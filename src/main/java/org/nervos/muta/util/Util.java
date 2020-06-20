@@ -15,17 +15,6 @@ public class Util {
 
     public static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    @NotNull
-    public static String BigIntegerToHex(@NotNull BigInteger bigInteger){
-        return "0x"+bigInteger.toString(16);
-    }
-
-    @NotNull
-    public static String StringToHex(String decimal){
-        return "0x"+ new BigInteger(decimal).toString(16);
-    }
-
-
     public static byte[] keccak256(byte[] input) {
 
         Keccak.DigestKeccak kecc = new Keccak.Digest256();
@@ -42,9 +31,17 @@ public class Util {
     public static String generateRandom32BytesHex(){
         return "0x"+Hex.toHexString(generateRandom32Bytes());
     }
+
     public static String start0x(String input){
         if(!input.startsWith("0x")){
             return "0x" + input;
+        }
+        return input;
+    }
+
+    public static String remove0x(String input){
+        if(input.startsWith("0x")){
+            return input.substring(2);
         }
         return input;
     }

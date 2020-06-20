@@ -8,6 +8,9 @@ import org.nervos.muta.client.type.MutaRequestOption;
 import org.nervos.muta.client.type.request.SendTransactionRequest;
 import org.nervos.muta.util.Util;
 import org.nervos.muta.wallet.Account;
+import org.web3j.rlp.RlpEncoder;
+import org.web3j.rlp.RlpList;
+import org.web3j.rlp.RlpString;
 
 import java.io.IOException;
 
@@ -105,11 +108,33 @@ public class Muta {
 
         byte[] sig = this.account.sign(txHash);
 
+        System.out.println("sig: " + Hex.toHexString(sig));
+
+        byte[] sigs =  RlpEncoder.encode(
+                new RlpList(
+                        RlpString.create(sig)
+                )
+        );
+
+        byte[] publicKeys =  RlpEncoder.encode(
+                new RlpList(
+                        RlpString.create(Hex.decode(account.publicKey))
+                )
+        );
+        System.out.println("publicKey: " + account.publicKey);
+
+//        SendTransactionRequest.InputTransactionEncryption inputTransactionEncryption = new SendTransactionRequest.InputTransactionEncryption(
+//                Util.start0x(Hex.toHexString(publicKeys)),
+//                Util.start0x(Hex.toHexString(sigs)),
+//                Util.start0x(Hex.toHexString(txHash))
+//        );
+
         SendTransactionRequest.InputTransactionEncryption inputTransactionEncryption = new SendTransactionRequest.InputTransactionEncryption(
                 Util.start0x(account.publicKey),
                 Util.start0x(Hex.toHexString(sig)),
                 Util.start0x(Hex.toHexString(txHash))
         );
+
 
         System.out.println(inputTransactionEncryption);
 

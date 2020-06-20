@@ -46,7 +46,7 @@ public class Client {
 
             JsonNode root = objectMapper.readTree(responseBody);
             if (root.has("errors")) {
-                throw new IOException(operation + " error");
+                throw new IOException(operation + " error,\n" + responseBody);
 
             } else if (root.get("data").has(operation)) {
                 JsonNode result = root.get("data").get(operation);
@@ -138,6 +138,9 @@ public class Client {
         MutaRequest mutaRequest = new MutaRequest(SendTransactionRequest.operation, new SendTransactionRequest.Param(inputRaw, inputEncryption), SendTransactionRequest.query);
 
         String payload = objectMapper.writeValueAsString(mutaRequest);
+
+        System.out.println(payload);
+
         Response response = this.send(payload);
 
         String ret = this.parse(response, SendTransactionRequest.operation, String.class);
