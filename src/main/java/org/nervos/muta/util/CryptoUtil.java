@@ -3,6 +3,7 @@ package org.nervos.muta.util;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.digests.KeccakDigest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.digests.SHA3Digest;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
@@ -40,7 +41,7 @@ public class CryptoUtil {
         signer.init(true, privKey);
         BigInteger[] components = signer.generateSignature(data);
 
-        if (components[1].compareTo(HALF_CURVE_ORDER)<=0){
+        if (components[1].compareTo(HALF_CURVE_ORDER)>=0){
             components[1] = CURVE.getN().subtract(components[1]);
         }
 
@@ -52,13 +53,6 @@ public class CryptoUtil {
         System.arraycopy(s,0,sig,32,32);
 
         return sig;
-    }
-
-    public static void main(String[] args) {
-        BigInteger priv = new BigInteger("45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f",16);
-        byte[] data = Hex.decode("1234567890123456789012345678901234567890123456789012345678901234");
-
-        System.out.println(Hex.toHexString(CryptoUtil.sign(priv, data)));
     }
 
     public static byte[] convertBigIntegerToBytes32(BigInteger bi){

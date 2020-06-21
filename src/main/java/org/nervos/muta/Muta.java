@@ -6,6 +6,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.nervos.muta.client.Client;
 import org.nervos.muta.client.type.MutaRequestOption;
 import org.nervos.muta.client.type.request.SendTransactionRequest;
+import org.nervos.muta.client.type.response.Receipt;
 import org.nervos.muta.util.Util;
 import org.nervos.muta.wallet.Account;
 import org.web3j.rlp.RlpEncoder;
@@ -13,6 +14,7 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpString;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 public class Muta {
     public Client client;
@@ -57,17 +59,21 @@ public class Muta {
         return ret;
     }
 
+    //queryService without payload
     public <T> T queryService(@NonNull String serviceName, @NonNull String method, Class<T> clazz) throws IOException {
 
         T ret = this.queryService(serviceName, method, "", null, mutaRequestOption.caller, null, null, clazz);
         return ret;
     }
 
+    //queryService with given payload
     public <T, P> T queryService(@NonNull String serviceName, @NonNull String method, @NonNull P payloadData, Class<T> clazz) throws IOException {
         String payload = this.objectMapper.writeValueAsString(payloadData);
         T ret = this.queryService(serviceName, method, payload, null, mutaRequestOption.caller, null, null, clazz);
         return ret;
     }
+
+
 
     public String sendTransaction(String chainId, String cyclesLimit, String cyclesPrice, String nonce, String timeout, @NonNull String serviceName, @NonNull String method, String payload) throws IOException {
         if (chainId == null) {
@@ -84,7 +90,8 @@ public class Muta {
         }
 
         if (timeout == null) {
-            timeout = mutaRequestOption.timeout;
+            BigInteger latestHeight = this.client.getLatestHeight();
+            timeout = Util.start0x(new BigInteger(Util.remove0x(mutaRequestOption.timeout),16).add(latestHeight).toString(16));
         }
         if (payload == null) {
             payload = "";
@@ -104,11 +111,7 @@ public class Muta {
 
         byte[] txHash = Util.keccak256(inputRawTransaction.encode());
 
-        System.out.println("txHash: " + Hex.toHexString(txHash));
-
         byte[] sig = this.account.sign(txHash);
-
-        System.out.println("sig: " + Hex.toHexString(sig));
 
         byte[] sigs =  RlpEncoder.encode(
                 new RlpList(
@@ -121,13 +124,6 @@ public class Muta {
                         RlpString.create(Hex.decode(account.publicKey))
                 )
         );
-        System.out.println("publicKey: " + account.publicKey);
-
-//        SendTransactionRequest.InputTransactionEncryption inputTransactionEncryption = new SendTransactionRequest.InputTransactionEncryption(
-//                Util.start0x(Hex.toHexString(publicKeys)),
-//                Util.start0x(Hex.toHexString(sigs)),
-//                Util.start0x(Hex.toHexString(txHash))
-//        );
 
         SendTransactionRequest.InputTransactionEncryption inputTransactionEncryption = new SendTransactionRequest.InputTransactionEncryption(
                 Util.start0x(account.publicKey),
@@ -135,13 +131,11 @@ public class Muta {
                 Util.start0x(Hex.toHexString(txHash))
         );
 
-
-        System.out.println(inputTransactionEncryption);
-
         String ret = this.client.sendTransaction(inputRawTransaction, inputTransactionEncryption);
         return ret;
     }
 
+    //sendTransaction only with serviceName, method and payloadData
     public <P> String sendTransaction(@NonNull String serviceName, @NonNull String method, P payloadData) throws IOException {
         String payload = this.objectMapper.writeValueAsString(payloadData);
 
@@ -154,5 +148,38 @@ public class Muta {
                 method,
                 payload
         );
+    }
+
+
+
+    public <P> P getReceiptSucceedData(String txHash,Class<P> clazz)throws IOException{
+        Receipt receipt = client.getReceipt(txHash);
+
+        P ret = objectMapper.readValue(receipt.response.response.succeedData,clazz);
+        return ret;
+    }
+
+    public <P> P getReceiptSucceedDataRetry(String txHash,Class<P> clazz)throws IOException{
+        int times = 10;
+        while(times>0){
+
+            try{
+
+                P ret = getReceiptSucceedData(txHash, clazz);
+                return ret;
+            }catch (IOException e){
+
+            }
+
+            try {
+                Thread.sleep(1000*5);
+            } catch (InterruptedException e) {
+                //e.printStackTrace();
+            }
+
+            times--;
+        }
+
+        throw new IOException("getReceipt() fails to retrieve tx data");
     }
 }

@@ -67,17 +67,6 @@ public class SendTransactionRequest {
         @NonNull
         public String sender;
 
-        /*
-        s.append(&self.chain_id.as_bytes().to_vec());
-        s.append(&self.cycles_limit);
-        s.append(&self.cycles_price);
-        s.append(&self.nonce.as_bytes().to_vec());
-        s.append(&self.request.method);
-        s.append(&self.request.service_name);
-        s.append(&self.request.payload);
-        s.append(&self.timeout);
-        s.append(&self.sender);
-         */
         public byte[] encode() {
             byte[] ret = RlpEncoder.encode(
                     new RlpList(
@@ -97,7 +86,7 @@ public class SendTransactionRequest {
                             )
                     )
             );
-            System.out.println("rlp: "+Hex.toHexString(ret));
+            //System.out.println("rlp: "+Hex.toHexString(ret));
             return ret;
         }
 
@@ -118,20 +107,5 @@ public class SendTransactionRequest {
                     ((RlpString) rlpTypeList.get(8)).asString()
             );
         }
-    }
-
-    public static void main(String[] args) {
-        InputRawTransaction inputRawTransaction = new InputRawTransaction(
-                "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "0x00","0x00",
-                "method",
-                "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "payload",
-                "service_name",
-                "0x9999",
-                "0x01"
-        );
-
-        System.out.println(Hex.toHexString(inputRawTransaction.encode()));
     }
 }

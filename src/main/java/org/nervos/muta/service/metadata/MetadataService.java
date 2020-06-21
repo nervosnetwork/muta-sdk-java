@@ -14,16 +14,8 @@ public class MetadataService {
     public static final String METHOD_GET_METADATA = "get_metadata";
 
     public Metadata getMetadata() throws IOException {
-        Metadata metadata = muta.queryService(SERVICE_NAME,METHOD_GET_METADATA,null,null,null,null,null, Metadata.class);
+        Metadata metadata = muta.queryService(SERVICE_NAME,METHOD_GET_METADATA, Metadata.class);
 
         return metadata;
-    }
-
-    public static void main(String[] args) throws IOException {
-        Muta muta = Muta.defaultMuta();
-        MetadataService metadataService = new MetadataService(muta);
-
-        Metadata metadata = metadataService.getMetadata();
-        System.out.println(metadata);
     }
 }

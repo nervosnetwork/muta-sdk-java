@@ -10,8 +10,10 @@ import org.nervos.muta.client.type.response.Block;
 import org.nervos.muta.client.type.response.Receipt;
 import org.nervos.muta.client.type.response.ServiceResponse;
 import org.nervos.muta.client.type.response.Transaction;
+import org.nervos.muta.util.Util;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 public class Client {
 
@@ -36,10 +38,12 @@ public class Client {
     public Response send(String payload) throws IOException {
         RequestBody body = RequestBody.create(payload, APPLICATION_JSON);
         Request request = new Request.Builder().url(url).post(body).build();
+        System.out.println("client send: "+payload);
         return httpClient.newCall(request).execute();
 
     }
 
+    // parse a graphql result into class
     public <T> T parse(Response response, String operation, Class<T> clazz) throws IOException {
         if (response.isSuccessful()) {
             String responseBody = response.body().string();
@@ -62,6 +66,7 @@ public class Client {
         }
     }
 
+    // parse ServiceResponse's succeedData into class
     public <T> T parseServiceResponse(ServiceResponse serviceResponse, Class<T> clazz) throws IOException{
         if (!ZERO_UINT8.equals(serviceResponse.code) ){
             throw new IOException("ServiceResponse code : " + serviceResponse.code+", message : " + serviceResponse.errorMessage);
@@ -82,6 +87,11 @@ public class Client {
         Block ret = this.parse(response, GetBlockRequest.operation, Block.class);
 
         return ret;
+    }
+
+    public BigInteger getLatestHeight() throws IOException{
+        Block block = this.getBlock(null);
+        return new BigInteger(Util.remove0x(block.header.height),16);
     }
 
 
@@ -139,19 +149,11 @@ public class Client {
 
         String payload = objectMapper.writeValueAsString(mutaRequest);
 
-        System.out.println(payload);
+        System.out.println("sendTransaction: "+payload);
 
         Response response = this.send(payload);
 
         String ret = this.parse(response, SendTransactionRequest.operation, String.class);
         return ret;
-    }
-
-
-    public static void main(String[] args) throws IOException {
-        Client client = new Client("http://localhost:8000/graphql");
-
-        Block block = client.getBlock("0x1");
-
     }
 }

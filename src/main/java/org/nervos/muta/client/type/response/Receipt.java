@@ -14,7 +14,8 @@ public class Receipt {
     public String cyclesUsed;
     public Vector<Event> events;
     public String stateRoot;
-
+    public String txHash;
+    public ReceiptResponse response;
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
