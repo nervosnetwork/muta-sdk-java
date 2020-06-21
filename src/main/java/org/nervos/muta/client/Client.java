@@ -144,7 +144,7 @@ public class Client {
 
 
 
-    public String sendTransaction(SendTransactionRequest.InputRawTransaction inputRaw, SendTransactionRequest.InputTransactionEncryption inputEncryption) throws IOException {
+    public String sendTransaction(RawTransaction inputRaw, TransactionEncryption inputEncryption) throws IOException {
         MutaRequest mutaRequest = new MutaRequest(SendTransactionRequest.operation, new SendTransactionRequest.Param(inputRaw, inputEncryption), SendTransactionRequest.query);
 
         String payload = objectMapper.writeValueAsString(mutaRequest);

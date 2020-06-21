@@ -7,8 +7,6 @@ import org.nervos.muta.util.Util;
 
 import java.math.BigInteger;
 
-import static org.bitcoinj.core.ECKey.fromPrivate;
-
 public class Account {
 
     public String privateKey;
@@ -35,6 +33,11 @@ public class Account {
         this.address = Hex.toHexString(address).substring(0,40);
     }
 
+
+    public static Account generate(){
+        return new Account(Util.remove0x(Util.generateRandom32BytesHex()));
+    }
+
     public static Account defaultAccoutn(){
         return new Account("45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f");
     }
@@ -43,4 +46,5 @@ public class Account {
         byte[] ret = CryptoUtil.sign(new BigInteger(privateKey, 16),msgHash);
         return ret;
     }
+
 }
