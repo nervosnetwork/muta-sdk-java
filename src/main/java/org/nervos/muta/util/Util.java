@@ -1,15 +1,9 @@
 package org.nervos.muta.util;
 
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.crypto.KeyCrypter;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
-import org.bouncycastle.jcajce.provider.digest.SHA3;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
-import org.jetbrains.annotations.NotNull;
 
-import java.math.BigInteger;
-import java.security.*;
+import java.security.SecureRandom;
 
 public class Util {
 

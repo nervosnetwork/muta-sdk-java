@@ -20,10 +20,19 @@ dependencies {
 
     //we ONLY use bitcoinj to function bip44
     implementation group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.8'
-    implementation group: 'org.bouncycastle', name: 'bcprov-debug-jdk15on', version: '1.65'
+    //implementation group: 'org.bouncycastle', name: 'bcprov-debug-jdk15on', version: '1.65'
     implementation group: 'org.web3j', name: 'rlp', version: '5.0.0'
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
 
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+
+}
+
+test {
+    // Use junit platform for unit tests
+    useJUnitPlatform()
 }

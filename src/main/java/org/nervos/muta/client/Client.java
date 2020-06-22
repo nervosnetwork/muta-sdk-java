@@ -115,7 +115,7 @@ public class Client {
         return ret;
     }
 
-    public ServiceResponse queryServiceRaw(String serviceName, String method, String payload, String height, String caller, String cyclePrice, String cycleLimit) throws IOException {
+    public ServiceResponse queryService(String serviceName, String method, String payload, String height, String caller, String cyclePrice, String cycleLimit) throws IOException {
         MutaRequest mutaRequest = new MutaRequest(QueryServiceRequest.operation, new QueryServiceRequest.Param(
                 serviceName,
                 method,
@@ -137,7 +137,7 @@ public class Client {
     public <T> T queryService(@NonNull String serviceName, @NonNull String method, @NonNull String payload, String height, @NonNull String caller, String cyclePrice, String cycleLimit, Class<T> clazz) throws IOException {
 
 
-        ServiceResponse serviceResponse = this.queryServiceRaw(serviceName, method, payload, height, caller, cyclePrice, cycleLimit);
+        ServiceResponse serviceResponse = this.queryService(serviceName, method, payload, height, caller, cyclePrice, cycleLimit);
         T ret = parseServiceResponse(serviceResponse, clazz);
         return ret;
     }

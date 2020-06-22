@@ -3,7 +3,6 @@ package org.nervos.muta.service.asset;
 import lombok.AllArgsConstructor;
 import org.nervos.muta.Muta;
 import org.nervos.muta.service.asset.type.*;
-import org.nervos.muta.service.metadata.type.Metadata;
 
 import java.io.IOException;
 
@@ -21,15 +20,14 @@ public class AssetService {
     public static final String METHOD_TRANSFER_FROM = "transfer_from";
 
     public Asset createAsset(String name, String symbol, long supply) throws IOException {
-        String txHash = muta.sendTransaction(SERVICE_NAME, METHOD_CREATE_ASSET,
+        Asset asset = muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_CREATE_ASSET,
                 new CreateAssetPayload(
                         name,
                         symbol,
-                        supply)
+                        supply),
+                Asset.class
                 );
-        System.out.println("createAsset txHash: "+ txHash);
-        Asset asset = muta.getReceiptSucceedDataRetry(txHash,Asset.class);
-        System.out.println("Asset: "+asset);
+
         return asset;
     }
 
@@ -55,20 +53,29 @@ public class AssetService {
     }
 
     public void transfer(String asset_id, String to, long value) throws IOException{
-        muta.queryService(SERVICE_NAME,METHOD_TRANSFER,new TransferPayload(
-                asset_id, to, value
-        ),Void.class);
+        muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_TRANSFER,
+                new TransferPayload(
+                        asset_id, to, value
+                ),
+                Void.class
+        );
     }
 
     public void approve(String asset_id,String to, long value) throws IOException{
-        muta.queryService(SERVICE_NAME,METHOD_TRANSFER,new TransferPayload(
-                asset_id, to, value
-        ),Void.class);
+        muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_APPROVE,
+                new TransferPayload(
+                        asset_id, to, value
+                ),
+                Void.class
+        );
     }
 
     public void transfer_from(String asset_id,String sender,String recipient,long value) throws IOException{
-        muta.queryService(SERVICE_NAME,METHOD_TRANSFER,new TransferFromPayload(
-                asset_id, sender, recipient, value
-        ),Void.class);
+        muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_TRANSFER_FROM,
+                new TransferFromPayload(
+                        asset_id, sender, recipient, value
+                ),
+                Void.class
+        );
     }
 }

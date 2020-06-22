@@ -22,12 +22,11 @@ public class Muta {
 
 
     public Muta(Client client, Account account, MutaRequestOption defaultReqOption) {
-        if (client == null) {
-            client = Client.defaultClient();
-        }
+
 
         if (account == null) {
-            account = Account.defaultAccoutn();
+            account = Account.defaultAccount();
+            System.out.println("you are using default account!");
         }
 
         if (defaultReqOption == null) {
@@ -52,6 +51,7 @@ public class Muta {
             caller = mutaRequestOption.caller;
         }
 
+        checkClient();
 
         T ret = this.client.queryService(serviceName, method, payload, height, caller, cyclePrice, cycleLimit, clazz);
         return ret;
@@ -91,10 +91,13 @@ public class Muta {
 
         TransactionEncryption transactionEncryption = this.signTransaction(rawTransaction);
 
-        String ret = this.client.sendTransaction(rawTransaction, transactionEncryption);
+        checkClient();
+
+        String ret = this.sendTransaction(rawTransaction, transactionEncryption);
         return ret;
     }
 
+    //this is the commonly used sendTransaction
     //sendTransaction only with serviceName, method and payloadData
     public <P> String sendTransaction(@NonNull String serviceName, @NonNull String method, P payloadData) throws IOException {
         String payload = this.objectMapper.writeValueAsString(payloadData);
@@ -111,20 +114,39 @@ public class Muta {
     }
 
     public String sendTransaction(RawTransaction rawTransaction, TransactionEncryption transactionEncryption) throws IOException {
+        checkClient();
         String ret = this.client.sendTransaction(rawTransaction, transactionEncryption);
         return ret;
     }
 
+    public <P,R> R sendTransactionAndPollResult(@NonNull String serviceName, @NonNull String method, P payloadData,Class<R> clazz) throws IOException {
+        String payload = this.objectMapper.writeValueAsString(payloadData);
 
-    public <P> P getReceiptSucceedData(String txHash, Class<P> clazz) throws IOException {
+        String txHash= this.sendTransaction(null,
+                null,
+                null,
+                null,
+                null,
+                serviceName,
+                method,
+                payload
+        );
+
+        return getReceiptSucceedDataRetry(txHash, clazz);
+    }
+
+
+    public <R> R getReceiptSucceedData(String txHash, Class<R> clazz) throws IOException {
+        checkClient();
+
         Receipt receipt = client.getReceipt(txHash);
 
-        P ret = objectMapper.readValue(receipt.response.response.succeedData, clazz);
+        R ret = objectMapper.readValue(receipt.response.response.succeedData, clazz);
         return ret;
     }
 
     public <P> P getReceiptSucceedDataRetry(String txHash, Class<P> clazz) throws IOException {
-        int times = 10;
+        int times = this.mutaRequestOption.polling_times;
         while (times > 0) {
 
             try {
@@ -136,7 +158,7 @@ public class Muta {
             }
 
             try {
-                Thread.sleep(1000 * 5);
+                Thread.sleep(this.mutaRequestOption.polling_interval);
             } catch (InterruptedException e) {
                 //e.printStackTrace();
             }
@@ -176,6 +198,7 @@ public class Muta {
         }
 
         if (timeout == null) {
+            checkClient();
             BigInteger latestHeight = this.client.getLatestHeight();
             timeout = Util.start0x(new BigInteger(Util.remove0x(mutaRequestOption.timeout), 16).add(latestHeight).toString(16));
         }
@@ -198,6 +221,7 @@ public class Muta {
         return rawTransaction;
     }
 
+    // sign a raw transaction, do nothing more
     public TransactionEncryption signTransaction(RawTransaction rawTransaction){
         byte[] txHash = Util.keccak256(rawTransaction.encode());
 
@@ -212,6 +236,7 @@ public class Muta {
         return transactionEncryption;
     }
 
+    // sign a raw transaction and append your sig to given transaction sig (transactionEncryption)
     public TransactionEncryption appendSignedTransaction(RawTransaction rawTransaction, TransactionEncryption transactionEncryption) throws IOException {
         byte[] txHash = Util.keccak256(rawTransaction.encode());
         if(!Util.start0x(Hex.toHexString(txHash)).equals(transactionEncryption.txHash)){
@@ -223,5 +248,11 @@ public class Muta {
         transactionEncryption.appendSignatureAndPubkey(signed);
 
         return transactionEncryption;
+    }
+
+    private void checkClient() throws IOException{
+        if(this.client==null){
+            throw new IOException("the client of Muta instance hasn't been set");
+        }
     }
 }

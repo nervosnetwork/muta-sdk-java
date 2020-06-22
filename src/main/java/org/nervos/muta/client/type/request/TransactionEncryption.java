@@ -1,6 +1,5 @@
 package org.nervos.muta.client.type.request;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import org.bouncycastle.util.encoders.Hex;
@@ -8,9 +7,6 @@ import org.web3j.rlp.RlpDecoder;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpString;
-
-import java.io.IOException;
-import java.util.Vector;
 
 @Data
 public class TransactionEncryption {
