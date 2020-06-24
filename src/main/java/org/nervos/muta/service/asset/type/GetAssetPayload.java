@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class GetAssetPayload {
-    public String id;
+    private String id;
 }

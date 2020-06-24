@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Account {
-    public String address;
-    public int weight;
-    public boolean is_multiple;
+    private String address;
+    private int weight;
+    private boolean is_multiple;
 }

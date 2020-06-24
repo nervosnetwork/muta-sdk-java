@@ -10,6 +10,6 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AssetBalance {
-    public long value;
-    public Map<String,Long> allowance;
+    private long value;
+    private Map<String,Long> allowance;
 }

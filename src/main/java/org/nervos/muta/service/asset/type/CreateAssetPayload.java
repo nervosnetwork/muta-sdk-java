@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateAssetPayload {
-    public String name;
-    public String symbol;
-    public long supply;
+    private String name;
+    private String symbol;
+    private long supply;
 }

@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetBalancePayload {
-    public String asset_id;
-    public String user;
+    private String asset_id;
+    private String user;
 }

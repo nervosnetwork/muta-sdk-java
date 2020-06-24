@@ -8,27 +8,17 @@ import org.nervos.muta.util.Util;
 
 import java.math.BigInteger;
 
+@Getter
 public class Account {
 
-    public String getPrivateKey() {
-        return Util.start0x(privateKey);
-    }
 
-    public String getPublicKey() {
-        return Util.start0x(publicKey);
-    }
+    private final String privateKey;
 
-    public String getAddress() {
-        return Util.start0x(address);
-    }
+    private final String publicKey;
 
-    public String privateKey;
+    private final String address;
 
-    public String publicKey;
-
-    public String address;
-
-    private ECPoint point;
+    private final ECPoint point;
 
 
     public Account(String privateKey){
@@ -52,11 +42,21 @@ public class Account {
         return new Account("0x45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f");
     }
 
+    public String getPrivateKey() {
+        return Util.start0x(privateKey);
+    }
+
+    public String getPublicKey() {
+        return Util.start0x(publicKey);
+    }
+
+    public String getAddress() {
+        return Util.start0x(address);
+    }
+
     public byte[] sign(byte[] msgHash){
         byte[] ret = CryptoUtil.sign(new BigInteger(privateKey, 16),msgHash);
         return ret;
     }
-
-
 
 }

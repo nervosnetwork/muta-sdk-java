@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Asset {
-    public String id;
-    public String name;
-    public String symbol;
-    public long supply;
-    public String issuer;
+    private String id;
+    private String name;
+    private String symbol;
+    private long supply;
+    private String issuer;
 }

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetAllowancePayload {
-    public String asset_id;
-    public String grantor;
-    public String grantee;
+    private String asset_id;
+    private String grantor;
+    private String grantee;
 }

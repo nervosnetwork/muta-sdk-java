@@ -1,14 +1,19 @@
 package org.nervos.muta.service.asset;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.nervos.muta.Muta;
 import org.nervos.muta.service.asset.type.*;
+import org.nervos.muta.util.Util;
 
 import java.io.IOException;
 
 @AllArgsConstructor
+@Getter
 public class AssetService {
-    public Muta muta;
+    private final Muta muta;
 
     public static final String SERVICE_NAME = "asset";
     public static final String METHOD_CREATE_ASSET = "create_asset";
@@ -45,7 +50,7 @@ public class AssetService {
         return ret;
     }
 
-    public GetAllowanceResponse getBalance(String asset_id,String grantor,String grantee) throws IOException{
+    public GetAllowanceResponse getAllowance(String asset_id,String grantor,String grantee) throws IOException{
         GetAllowanceResponse ret = muta.queryService(SERVICE_NAME,METHOD_GET_ALLOWANCE,new GetAllowancePayload(
                 asset_id, grantor,grantee
         ),GetAllowanceResponse.class);
@@ -56,8 +61,7 @@ public class AssetService {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_TRANSFER,
                 new TransferPayload(
                         asset_id, to, value
-                ),
-                Void.class
+                ),Util.MutaVoid.class
         );
     }
 
@@ -66,7 +70,7 @@ public class AssetService {
                 new TransferPayload(
                         asset_id, to, value
                 ),
-                Void.class
+                Util.MutaVoid.class
         );
     }
 
@@ -74,8 +78,9 @@ public class AssetService {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_TRANSFER_FROM,
                 new TransferFromPayload(
                         asset_id, sender, recipient, value
-                ),
-                Void.class
+                ),Util.MutaVoid.class
         );
     }
+
+
 }

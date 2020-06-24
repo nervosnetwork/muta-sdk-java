@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransferPayload {
-    public String asset_id;
-    public String to;
-    public long value;
+    private String asset_id;
+    private String to;
+    private long value;
 }

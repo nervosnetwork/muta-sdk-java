@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SetThresholdPayload {
-    public VerifySignaturePayload witness;
-    public String multi_sig_address;
-    public int new_threshold;
+    private VerifySignaturePayload witness;
+    private String multi_sig_address;
+    private int new_threshold;
 }

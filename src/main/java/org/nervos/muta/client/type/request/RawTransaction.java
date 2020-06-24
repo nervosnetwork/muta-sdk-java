@@ -18,23 +18,23 @@ import java.math.BigInteger;
 public class RawTransaction {
 
     @NonNull
-    public String chainId;
+    private String chainId;
     @NonNull
-    public String cyclesLimit;
+    private String cyclesLimit;
     @NonNull
-    public String cyclesPrice;
+    private String cyclesPrice;
     @NonNull
-    public String method;
+    private String method;
     @NonNull
-    public String nonce;
+    private String nonce;
     @NonNull
-    public String payload;
+    private String payload;
     @NonNull
-    public String serviceName;
+    private String serviceName;
     @NonNull
-    public String timeout;
+    private String timeout;
     @NonNull
-    public String sender;
+    private String sender;
 
     public byte[] encode() {
         byte[] ret = RlpEncoder.encode(
@@ -50,10 +50,10 @@ public class RawTransaction {
                         RlpString.create(Util.remove0x(this.payload)),
 
                         RlpString.create(new BigInteger(Util.remove0x(this.timeout),16)),
-//                        new RlpList(
-//                                RlpString.create(Hex.decode(Util.remove0x(this.sender)))
-//                        )
-                        RlpString.create(Hex.decode(Util.remove0x(this.sender)))
+                        new RlpList(
+                                RlpString.create(Hex.decode(Util.remove0x(this.sender)))
+                        )
+
                 )
         );
         return ret;

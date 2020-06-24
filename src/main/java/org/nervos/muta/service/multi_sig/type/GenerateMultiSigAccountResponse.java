@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GenerateMultiSigAccountResponse {
-    public String address;
+    private String address;
 }

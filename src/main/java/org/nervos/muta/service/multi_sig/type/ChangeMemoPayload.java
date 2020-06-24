@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChangeMemoPayload {
-    public VerifySignaturePayload witness;
-    public String multi_sig_address;
-    public String new_memo;
+    private VerifySignaturePayload witness;
+    private String multi_sig_address;
+    private String new_memo;
 }

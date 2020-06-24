@@ -3,10 +3,13 @@ package org.nervos.muta.client.type.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+@AllArgsConstructor
+@Data
 public class QueryServiceRequest {
     public static String operation = "queryService";
 
-    public static String query = "query queryService(\n" +
+    public static String query =
+            "query queryService(\n" +
             "  $serviceName: String!\n" +
             "  $method: String!\n" +
             "  $payload: String!\n" +
@@ -30,16 +33,12 @@ public class QueryServiceRequest {
             "  }\n" +
             "}";
 
-    @Data
-    @AllArgsConstructor
-    public static class Param{
-        public String serviceName;
-        public String method;
-        public String payload;
-        public String height;
-        public String caller;
-        public String cyclePrice;
-        public String cycleLimit;
-    }
+    private String serviceName;
+    private String method;
+    private String payload;
+    private String height;
+    private String caller;
+    private String cyclePrice;
+    private String cycleLimit;
 
 }

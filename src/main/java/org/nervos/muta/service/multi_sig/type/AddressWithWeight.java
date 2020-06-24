@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddressWithWeight {
-    public String address;
-    public long weight;
+    private String address;
+    private long weight;
 }

@@ -1,17 +1,20 @@
 package org.nervos.muta.service.multi_sig;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.nervos.muta.Muta;
 import org.nervos.muta.service.multi_sig.type.*;
+import org.nervos.muta.util.Util;
 
 import java.io.IOException;
-import java.util.Vector;
+import java.util.List;
 
 @AllArgsConstructor
+@Getter
 public class MultiSigService {
-    public Muta muta;
+    private final Muta muta;
 
-    public static final String SERVICE_NAME = "multisig";
+    public static final String SERVICE_NAME = "multi_signature";
     public static final String METHOD_GENERATE_ACCOUNT = "generate_account";
     public static final String METHOD_GET_ACCOUNT_FROM_ADDRESS = "get_account_from_address";
     public static final String METHOD_VERIFY_SIGNATURE = "verify_signature";
@@ -23,7 +26,7 @@ public class MultiSigService {
     public static final String METHOD_SET_THRESHOLD = "set_threshold";
 
 
-    public GenerateMultiSigAccountResponse generate_account(String owner, Vector<AddressWithWeight> addr_with_weight, int threshold, String memo) throws IOException {
+    public GenerateMultiSigAccountResponse generate_account(String owner, List<AddressWithWeight> addr_with_weight, int threshold, String memo) throws IOException {
         GenerateMultiSigAccountResponse ret = muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_GENERATE_ACCOUNT,
                 new GenerateMultiSigAccountPayload(
                         owner,
@@ -36,21 +39,20 @@ public class MultiSigService {
         return ret;
     }
 
-    public GenerateMultiSigAccountResponse get_account_from_address(String multi_sig_address) throws IOException {
-        GenerateMultiSigAccountResponse ret = muta.queryService(SERVICE_NAME, METHOD_GET_ACCOUNT_FROM_ADDRESS, new GetMultiSigAccountPayload(
+    public GetMultiSigAccountResponse get_account_from_address(String multi_sig_address) throws IOException {
+        GetMultiSigAccountResponse ret = muta.queryService(SERVICE_NAME, METHOD_GET_ACCOUNT_FROM_ADDRESS, new GetMultiSigAccountPayload(
                 multi_sig_address
-        ), GenerateMultiSigAccountResponse.class);
+        ), GetMultiSigAccountResponse.class);
         return ret;
     }
 
-    public void get_account_from_address(SignedTransaction signedTransaction) throws IOException {
+    public void verify_signature(SignedTransaction signedTransaction) throws IOException {
         muta.queryService(SERVICE_NAME, METHOD_VERIFY_SIGNATURE, signedTransaction, Void.class);
     }
 
     public void change_owner(ChangeOwnerPayload changeOwnerPayload) throws IOException {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_CHANGE_OWNER,
-                changeOwnerPayload,
-                Void.class
+                changeOwnerPayload, Util.MutaVoid.class
         );
     }
 
@@ -63,8 +65,7 @@ public class MultiSigService {
 
     public void add_account(AddAccountPayload addAccountPayload) throws IOException {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_ADD_ACCOUNT,
-                addAccountPayload,
-                Void.class
+                addAccountPayload,Util.MutaVoid.class
         );
     }
 

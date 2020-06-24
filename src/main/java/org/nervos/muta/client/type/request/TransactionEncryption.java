@@ -3,10 +3,10 @@ package org.nervos.muta.client.type.request;
 import lombok.Data;
 import lombok.NonNull;
 import org.bouncycastle.util.encoders.Hex;
-import org.web3j.rlp.RlpDecoder;
-import org.web3j.rlp.RlpEncoder;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpString;
+import org.nervos.muta.util.Util;
+import org.web3j.rlp.*;
+
+import java.util.List;
 
 @Data
 public class TransactionEncryption {
@@ -17,26 +17,45 @@ public class TransactionEncryption {
     @NonNull
     public String txHash;
 
-    public TransactionEncryption(String txHash, String pubkey,String signature){
-        this.pubkey = Hex.toHexString(RlpEncoder.encode(new RlpList(
-                RlpString.create(pubkey)
-        )));
-        this.signature = Hex.toHexString(RlpEncoder.encode(new RlpList(
-                RlpString.create(signature)
-        )));
-        this.txHash = txHash;
+    public TransactionEncryption(String pubkey,String signature,String txHash){
+
+        String pub = Util.start0x(Hex.toHexString(RlpEncoder.encode(new RlpList(
+                RlpString.create(Hex.decode(Util.remove0x(pubkey)))
+        ))));
+
+        //System.out.println("pub: "+pub);
+
+        this.pubkey = pub;
+        this.signature = Util.start0x(Hex.toHexString(RlpEncoder.encode(new RlpList(
+                RlpString.create(Hex.decode(signature))
+        ))));
+        this.txHash = Util.start0x(txHash);
     }
 
     public void appendSignatureAndPubkey(TransactionEncryption transactionEncryption){
 
-        RlpList pubkeys = RlpDecoder.decode( Hex.decode(this.pubkey));
-        pubkeys.getValues().add(RlpString.create(transactionEncryption.pubkey));
+        System.out.println("this.pubkey: "+ this.pubkey);
+        RlpList pubkeys = RlpDecoder.decode( Hex.decode(Util.remove0x(this.pubkey)));
+        List<RlpType> pubkeylist = ((RlpList)pubkeys.getValues().get(0)).getValues();
 
-        this.pubkey = Hex.toHexString(RlpEncoder.encode(pubkeys));
+        RlpList pubkeys_to_add = RlpDecoder.decode( Hex.decode(Util.remove0x(transactionEncryption.pubkey)));
+        List<RlpType> pubkeylist_to_add = ((RlpList)pubkeys_to_add.getValues().get(0)).getValues();
 
-        RlpList signatures = RlpDecoder.decode( Hex.decode(this.signature));
-        signatures.getValues().add(RlpString.create(transactionEncryption.signature));
+        pubkeylist.addAll(pubkeylist_to_add);
 
-        this.signature = Hex.toHexString(RlpEncoder.encode(signatures));
+        this.pubkey = Util.start0x(Hex.toHexString(RlpEncoder.encode(new RlpList(pubkeylist))));
+        System.out.println("this.pubkey: "+ this.pubkey);
+
+        //================
+
+        RlpList sigs = RlpDecoder.decode( Hex.decode(Util.remove0x(this.signature)));
+        List<RlpType> siglist = ((RlpList)sigs.getValues().get(0)).getValues();
+
+        RlpList sigs_to_add = RlpDecoder.decode( Hex.decode(Util.remove0x(transactionEncryption.signature)));
+        List<RlpType> siglist_to_add = ((RlpList)sigs_to_add.getValues().get(0)).getValues();
+
+        siglist.addAll(siglist_to_add);
+
+        this.signature = Util.start0x(Hex.toHexString(RlpEncoder.encode(new RlpList(siglist))));
     }
 }

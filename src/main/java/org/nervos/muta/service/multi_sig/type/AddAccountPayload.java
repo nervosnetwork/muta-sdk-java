@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddAccountPayload {
-    public VerifySignaturePayload witness;
-    public String multi_sig_address;
-    public Account new_account;
+    private VerifySignaturePayload witness;
+    private String multi_sig_address;
+    private Account new_account;
 }

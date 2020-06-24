@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetMultiSigAccountPayload {
-    public String multi_sig_address;
+    private String multi_sig_address;
 }

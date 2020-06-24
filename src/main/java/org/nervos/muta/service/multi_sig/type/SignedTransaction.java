@@ -5,30 +5,32 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /*
-Note that: this SignedTransaction is not same as RawTransaction, do not use this class except in MultiSig
+Note that: this SignedTransaction is not same as RawTransaction, do not use this class except in MultiSig query
+This Class is supposed to be used internally, but you can also manually build this class to do some MultiSig
+test before sending txs
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignedTransaction {
-    public RawTransaction raw;
-    public String tx_hash;
-    public String pubkey;
-    public String signature;
+    private RawTransaction raw;
+    private String tx_hash;
+    private String pubkey;
+    private String signature;
 
     public static class RawTransaction{
-        public String chain_id;
-        public long cycles_price;
-        public long cycles_limit;
-        public String nonce;
-        public TransactionRequest request;
-        public long timeout;
-        public String sender;
+        private String chain_id;
+        private long cycles_price;
+        private long cycles_limit;
+        private String nonce;
+        private TransactionRequest request;
+        private long timeout;
+        private String sender;
     }
 
     public static class TransactionRequest{
-        public String method;
-        public String service_name;
-        public String payload;//JSON string
+        private String method;
+        private String service_name;
+        private String payload;//JSON string
     }
 }

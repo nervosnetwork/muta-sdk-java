@@ -4,24 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 
+@Data
+@AllArgsConstructor
 public class SendTransactionRequest {
     public static String operation = "sendTransaction";
 
-    public static String query = "mutation sendTransaction(\n" +
+    public static String query =
+            "mutation sendTransaction(\n" +
             "  $inputRaw: InputRawTransaction!\n" +
             "  $inputEncryption: InputTransactionEncryption!\n" +
             ") {\n" +
             "  sendTransaction(inputRaw: $inputRaw, inputEncryption: $inputEncryption)\n" +
             "}";
 
-    @Data
-    @AllArgsConstructor
-    public static class Param {
-        @NonNull
-        public RawTransaction inputRaw;
-        @NonNull
-        public TransactionEncryption inputEncryption;
-    }
-
+    @NonNull
+    private RawTransaction inputRaw;
+    @NonNull
+    private TransactionEncryption inputEncryption;
 
 }

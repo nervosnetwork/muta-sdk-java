@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransferFromEvent {
-    public String asset_id;
-    public String caller;
-    public String sender;
-    public String recipient;
-    public long value;
+    private String asset_id;
+    private String caller;
+    private String sender;
+    private String recipient;
+    private long value;
 }

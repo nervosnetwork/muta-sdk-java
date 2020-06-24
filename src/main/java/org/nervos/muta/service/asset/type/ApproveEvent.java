@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApproveEvent {
-    public String asset_id;
-    public String grantor;
-    public String grantee;
-    public long value;
+    private String asset_id;
+    private String grantor;
+    private String grantee;
+    private long value;
 }

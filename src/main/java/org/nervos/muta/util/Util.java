@@ -1,5 +1,7 @@
 package org.nervos.muta.util;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -38,5 +40,10 @@ public class Util {
             return input.substring(2);
         }
         return input;
+    }
+
+    @NoArgsConstructor
+    public static class MutaVoid{
+
     }
 }

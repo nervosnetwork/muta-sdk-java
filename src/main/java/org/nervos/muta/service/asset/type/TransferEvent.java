@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TransferEvent {
-    public String asset_id;
-    public String from;
-    public String to;
-    public long value;
+    private String asset_id;
+    private String from;
+    private String to;
+    private long value;
 }

@@ -2,6 +2,7 @@ package org.nervos.muta.client;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import lombok.NonNull;
 import okhttp3.*;
 import org.nervos.muta.client.type.MutaRequest;
@@ -10,11 +11,14 @@ import org.nervos.muta.client.type.response.Block;
 import org.nervos.muta.client.type.response.Receipt;
 import org.nervos.muta.client.type.response.ServiceResponse;
 import org.nervos.muta.client.type.response.Transaction;
+import org.nervos.muta.exception.GraphQlError;
 import org.nervos.muta.util.Util;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.concurrent.TimeUnit;
 
+@Getter
 public class Client {
 
     private static final MediaType APPLICATION_JSON = MediaType.get("application/json; charset=utf-8");
@@ -24,11 +28,20 @@ public class Client {
     private final String ZERO_UINT8 = "0x0000000000000000";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    public OkHttpClient httpClient;
+
+    private OkHttpClient httpClient;
 
     public Client(String url) {
         this.url = url;
-        this.httpClient = new OkHttpClient();
+        this.httpClient  = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+    }
+
+    public Client(String url, OkHttpClient okHttpClient){
+        this.url = url;
+        this.httpClient = okHttpClient;
     }
 
     public static Client defaultClient(){
@@ -38,19 +51,23 @@ public class Client {
     public Response send(String payload) throws IOException {
         RequestBody body = RequestBody.create(payload, APPLICATION_JSON);
         Request request = new Request.Builder().url(url).post(body).build();
-        System.out.println("client send: "+payload);
+        //System.out.println("client send: "+payload);
         return httpClient.newCall(request).execute();
-
     }
 
     // parse a graphql result into class
-    public <T> T parse(Response response, String operation, Class<T> clazz) throws IOException {
+    public <T> T parse(@NonNull Response response, String operation, Class<T> clazz) throws IOException {
         if (response.isSuccessful()) {
+
+            if(response.body() == null){
+                throw new GraphQlError("response.body() is null");
+            }
+
             String responseBody = response.body().string();
 
             JsonNode root = objectMapper.readTree(responseBody);
             if (root.has("errors")) {
-                throw new IOException(operation + " error,\n" + responseBody);
+                throw new GraphQlError(operation + " error,\n" + responseBody);
 
             } else if (root.get("data").has(operation)) {
                 JsonNode result = root.get("data").get(operation);
@@ -59,27 +76,28 @@ public class Client {
 
                 return ret;
             }
-            throw new IOException(operation + "parse error");
+            throw new GraphQlError(operation + " parse error");
 
         } else {
+
             throw new IOException("http error");
         }
     }
 
     // parse ServiceResponse's succeedData into class
     public <T> T parseServiceResponse(ServiceResponse serviceResponse, Class<T> clazz) throws IOException{
-        if (!ZERO_UINT8.equals(serviceResponse.code) ){
-            throw new IOException("ServiceResponse code : " + serviceResponse.code+", message : " + serviceResponse.errorMessage);
+        if (!ZERO_UINT8.equals(serviceResponse.getCode()) ){
+            throw new IOException("ServiceResponse code : " + serviceResponse.getCode()+", message : " + serviceResponse.getErrorMessage());
         }
 
-        String succeedMsg = serviceResponse.succeedData;
+        String succeedMsg = serviceResponse.getSucceedData();
 
         T ret = objectMapper.readValue(succeedMsg,clazz);
         return ret;
     }
 
     public Block getBlock(String height) throws IOException {
-        MutaRequest mutaRequest = new MutaRequest(GetBlockRequest.operation, new GetBlockRequest.Param(height), GetBlockRequest.query);
+        MutaRequest mutaRequest = new MutaRequest(GetBlockRequest.operation, new GetBlockRequest(height), GetBlockRequest.query);
 
         String payload = objectMapper.writeValueAsString(mutaRequest);
         Response response = this.send(payload);
@@ -91,12 +109,12 @@ public class Client {
 
     public BigInteger getLatestHeight() throws IOException{
         Block block = this.getBlock(null);
-        return new BigInteger(Util.remove0x(block.header.height),16);
+        return new BigInteger(Util.remove0x(block.getHeader().getHeight()),16);
     }
 
 
     public Transaction getTransaction(String txHash) throws IOException {
-        MutaRequest mutaRequest = new MutaRequest(GetTransactionRequest.operation, new GetTransactionRequest.Param(txHash), GetTransactionRequest.query);
+        MutaRequest mutaRequest = new MutaRequest(GetTransactionRequest.operation, new GetTransactionRequest(txHash), GetTransactionRequest.query);
 
         String payload = objectMapper.writeValueAsString(mutaRequest);
         Response response = this.send(payload);
@@ -106,7 +124,7 @@ public class Client {
     }
 
     public Receipt getReceipt(String txHash) throws IOException {
-        MutaRequest mutaRequest = new MutaRequest(GetReceiptRequest.operation, new GetReceiptRequest.Param(txHash), GetReceiptRequest.query);
+        MutaRequest mutaRequest = new MutaRequest(GetReceiptRequest.operation, new GetReceiptRequest(txHash), GetReceiptRequest.query);
 
         String payload = objectMapper.writeValueAsString(mutaRequest);
         Response response = this.send(payload);
@@ -116,7 +134,7 @@ public class Client {
     }
 
     public ServiceResponse queryService(String serviceName, String method, String payload, String height, String caller, String cyclePrice, String cycleLimit) throws IOException {
-        MutaRequest mutaRequest = new MutaRequest(QueryServiceRequest.operation, new QueryServiceRequest.Param(
+        MutaRequest mutaRequest = new MutaRequest(QueryServiceRequest.operation, new QueryServiceRequest(
                 serviceName,
                 method,
                 payload,
@@ -145,7 +163,7 @@ public class Client {
 
 
     public String sendTransaction(RawTransaction inputRaw, TransactionEncryption inputEncryption) throws IOException {
-        MutaRequest mutaRequest = new MutaRequest(SendTransactionRequest.operation, new SendTransactionRequest.Param(inputRaw, inputEncryption), SendTransactionRequest.query);
+        MutaRequest mutaRequest = new MutaRequest(SendTransactionRequest.operation, new SendTransactionRequest(inputRaw, inputEncryption), SendTransactionRequest.query);
 
         String payload = objectMapper.writeValueAsString(mutaRequest);
 

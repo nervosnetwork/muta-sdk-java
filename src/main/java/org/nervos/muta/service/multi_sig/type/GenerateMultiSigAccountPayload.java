@@ -4,14 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Vector;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class GenerateMultiSigAccountPayload {
-    public String owner;
-    public Vector<AddressWithWeight> addr_with_weight;
-    public int threshold;
-    public String memo;
+    private String owner;
+    private List<AddressWithWeight> addr_with_weight;
+    private int threshold;
+    private String memo;
 }

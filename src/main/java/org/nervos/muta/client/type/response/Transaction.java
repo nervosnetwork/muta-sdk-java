@@ -3,21 +3,22 @@ package org.nervos.muta.client.type.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.nervos.muta.client.batch.BatchQueryResponse;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Transaction {
-    public String chainId;
-    public String cyclesLimit;
-    public String cyclesPrice;
-    public String nonce;
-    public String timeout;
-    public String serviceName;
-    public String method;
-    public String payload;
-    public String txHash;
-    public String pubkey;
-    public String signature;
-    public String sender;
+public class Transaction implements BatchQueryResponse {
+    private String chainId;
+    private String cyclesLimit;
+    private String cyclesPrice;
+    private String nonce;
+    private String timeout;
+    private String serviceName;
+    private String method;
+    private String payload;
+    private String txHash;
+    private String pubkey;
+    private String signature;
+    private String sender;
 }

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetBalanceResponse {
-    public String asset_id;
-    public String user;
-    public long balance;
+    private String asset_id;
+    private String user;
+    private long balance;
 }

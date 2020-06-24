@@ -1,23 +1,28 @@
 package org.nervos.muta;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.encoders.Hex;
 import org.nervos.muta.client.Client;
 import org.nervos.muta.client.type.MutaRequestOption;
 import org.nervos.muta.client.type.request.RawTransaction;
 import org.nervos.muta.client.type.request.TransactionEncryption;
 import org.nervos.muta.client.type.response.Receipt;
+import org.nervos.muta.exception.ServiceResponseError;
 import org.nervos.muta.util.Util;
 import org.nervos.muta.wallet.Account;
 
 import java.io.IOException;
 import java.math.BigInteger;
 
+@Getter
+@Slf4j
 public class Muta {
-    public Client client;
-    public Account account;
-    public MutaRequestOption mutaRequestOption;
+    private final Client client;
+    private final Account account;
+    private final MutaRequestOption mutaRequestOption;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -26,7 +31,7 @@ public class Muta {
 
         if (account == null) {
             account = Account.defaultAccount();
-            System.out.println("you are using default account!");
+            log.warn("you are using default account: "+account.getAddress());
         }
 
         if (defaultReqOption == null) {
@@ -40,7 +45,7 @@ public class Muta {
 
 
     public static Muta defaultMuta() {
-        return new Muta(null, null, null);
+        return new Muta(Client.defaultClient(), null, null);
     }
 
     public <T> T queryService(@NonNull String serviceName, @NonNull String method, String payload, String height, String caller, String cyclePrice, String cycleLimit, Class<T> clazz) throws IOException {
@@ -48,7 +53,7 @@ public class Muta {
             payload = "";
         }
         if (caller == null) {
-            caller = mutaRequestOption.caller;
+            caller = mutaRequestOption.getCaller();
         }
 
         checkClient();
@@ -60,19 +65,26 @@ public class Muta {
     //queryService without payload
     public <T> T queryService(@NonNull String serviceName, @NonNull String method, Class<T> clazz) throws IOException {
 
-        T ret = this.queryService(serviceName, method, "", null, mutaRequestOption.caller, null, null, clazz);
+        T ret = this.queryService(serviceName, method, null, null, null, null, null, clazz);
         return ret;
     }
 
     //queryService with given payload
     public <T, P> T queryService(@NonNull String serviceName, @NonNull String method, @NonNull P payloadData, Class<T> clazz) throws IOException {
         String payload = this.objectMapper.writeValueAsString(payloadData);
-        T ret = this.queryService(serviceName, method, payload, null, mutaRequestOption.caller, null, null, clazz);
+        T ret = this.queryService(serviceName, method, payload, null, null, null, null, clazz);
         return ret;
     }
 
     // sign and send transaction
-    public String sendTransaction(String chainId, String cyclesLimit, String cyclesPrice, String nonce, String timeout, @NonNull String serviceName, @NonNull String method, String payload) throws IOException {
+    public String sendTransaction(String chainId,
+                                  String cyclesLimit,
+                                  String cyclesPrice,
+                                  String nonce,
+                                  String timeout,
+                                  @NonNull String serviceName,
+                                  @NonNull String method,
+                                  String payload) throws IOException {
 
         RawTransaction rawTransaction = this.compose(
                 chainId,
@@ -82,12 +94,17 @@ public class Muta {
                 timeout,
                 serviceName,
                 method,
-                payload
+                payload,
+                null
         );
 
-        byte[] txHash = Util.keccak256(rawTransaction.encode());
+        byte[] encoded = rawTransaction.encode();
 
-        byte[] sig = this.account.sign(txHash);
+        //System.out.println("encoded: "+Hex.toHexString(encoded));
+
+        byte[] txHash = Util.keccak256(encoded);
+
+        //System.out.println("txHash: "+Hex.toHexString(txHash));
 
         TransactionEncryption transactionEncryption = this.signTransaction(rawTransaction);
 
@@ -99,7 +116,9 @@ public class Muta {
 
     //this is the commonly used sendTransaction
     //sendTransaction only with serviceName, method and payloadData
-    public <P> String sendTransaction(@NonNull String serviceName, @NonNull String method, P payloadData) throws IOException {
+    public <P> String sendTransaction(@NonNull String serviceName,
+                                      @NonNull String method,
+                                      P payloadData) throws IOException {
         String payload = this.objectMapper.writeValueAsString(payloadData);
 
         return this.sendTransaction(null,
@@ -113,16 +132,20 @@ public class Muta {
         );
     }
 
-    public String sendTransaction(RawTransaction rawTransaction, TransactionEncryption transactionEncryption) throws IOException {
+    public String sendTransaction(RawTransaction rawTransaction,
+                                  TransactionEncryption transactionEncryption) throws IOException {
         checkClient();
         String ret = this.client.sendTransaction(rawTransaction, transactionEncryption);
         return ret;
     }
 
-    public <P,R> R sendTransactionAndPollResult(@NonNull String serviceName, @NonNull String method, P payloadData,Class<R> clazz) throws IOException {
+    public <P, R> R sendTransactionAndPollResult(@NonNull String serviceName,
+                                                 @NonNull String method,
+                                                 P payloadData,
+                                                 Class<R> clazz) throws IOException {
         String payload = this.objectMapper.writeValueAsString(payloadData);
 
-        String txHash= this.sendTransaction(null,
+        String txHash = this.sendTransaction(null,
                 null,
                 null,
                 null,
@@ -135,18 +158,27 @@ public class Muta {
         return getReceiptSucceedDataRetry(txHash, clazz);
     }
 
-
+    // while receipt is ready but the service response is error, thrown runtime exception
     public <R> R getReceiptSucceedData(String txHash, Class<R> clazz) throws IOException {
         checkClient();
 
         Receipt receipt = client.getReceipt(txHash);
 
-        R ret = objectMapper.readValue(receipt.response.response.succeedData, clazz);
+        if(!BigInteger.ZERO.equals(new BigInteger(Util.remove0x(receipt.getResponse().getResponse().getCode()),16))){
+            throw new ServiceResponseError(receipt.getResponse().getServiceName(),receipt.getResponse().getMethod(),receipt.getResponse().getResponse().getCode(),receipt.getResponse().getResponse().getErrorMessage());
+        }
+
+        if(Util.MutaVoid.class.equals(clazz)){
+            return (R)new Util.MutaVoid();
+        }
+
+        R ret = objectMapper.readValue(receipt.getResponse().getResponse().getSucceedData(), clazz);
+
         return ret;
     }
 
     public <P> P getReceiptSucceedDataRetry(String txHash, Class<P> clazz) throws IOException {
-        int times = this.mutaRequestOption.polling_times;
+        int times = this.mutaRequestOption.getPolling_times();
         while (times > 0) {
 
             try {
@@ -154,11 +186,11 @@ public class Muta {
                 P ret = getReceiptSucceedData(txHash, clazz);
                 return ret;
             } catch (IOException e) {
-
+                //e.printStackTrace();
             }
 
             try {
-                Thread.sleep(this.mutaRequestOption.polling_interval);
+                Thread.sleep(this.mutaRequestOption.getPolling_interval());
             } catch (InterruptedException e) {
                 //e.printStackTrace();
             }
@@ -169,7 +201,7 @@ public class Muta {
         throw new IOException("getReceipt() fails to retrieve tx data");
     }
 
-    public <P> RawTransaction compose(@NonNull String serviceName, @NonNull String method, P payloadData) throws IOException {
+    public <P> RawTransaction compose(@NonNull String serviceName, @NonNull String method, P payloadData,String sender) throws IOException {
         String payload = this.objectMapper.writeValueAsString(payloadData);
         return compose(null,
                 null,
@@ -178,20 +210,29 @@ public class Muta {
                 null,
                 serviceName,
                 method,
-                payload
+                payload,
+                sender
         );
     }
 
-    public RawTransaction compose(String chainId, String cyclesLimit, String cyclesPrice, String nonce, String timeout, @NonNull String serviceName, @NonNull String method, String payload) throws IOException {
+    public RawTransaction compose(String chainId,
+                                  String cyclesLimit,
+                                  String cyclesPrice,
+                                  String nonce,
+                                  String timeout,
+                                  @NonNull String serviceName,
+                                  @NonNull String method,
+                                  String payload,
+                                  String sender) throws IOException {
 
         if (chainId == null) {
-            chainId = mutaRequestOption.chainId;
+            chainId = mutaRequestOption.getChainId();
         }
         if (cyclesLimit == null) {
-            cyclesLimit = mutaRequestOption.cyclesLimit;
+            cyclesLimit = mutaRequestOption.getCyclesLimit();
         }
         if (cyclesPrice == null) {
-            cyclesPrice = mutaRequestOption.cyclesPrice;
+            cyclesPrice = mutaRequestOption.getCyclesPrice();
         }
         if (nonce == null) {
             nonce = Util.generateRandom32BytesHex();
@@ -200,10 +241,14 @@ public class Muta {
         if (timeout == null) {
             checkClient();
             BigInteger latestHeight = this.client.getLatestHeight();
-            timeout = Util.start0x(new BigInteger(Util.remove0x(mutaRequestOption.timeout), 16).add(latestHeight).toString(16));
+            timeout = Util.start0x(new BigInteger(Util.remove0x(mutaRequestOption.getTimeout()), 16).add(latestHeight).toString(16));
         }
         if (payload == null) {
             payload = "";
+        }
+
+        if(sender == null){
+            sender = account.getAddress();
         }
 
         RawTransaction rawTransaction = new RawTransaction(
@@ -215,22 +260,22 @@ public class Muta {
                 payload,
                 serviceName,
                 timeout,
-                Util.start0x(account.address)
+                sender
         );
 
         return rawTransaction;
     }
 
     // sign a raw transaction, do nothing more
-    public TransactionEncryption signTransaction(RawTransaction rawTransaction){
+    public TransactionEncryption signTransaction(RawTransaction rawTransaction) {
         byte[] txHash = Util.keccak256(rawTransaction.encode());
 
         byte[] sig = this.account.sign(txHash);
 
         TransactionEncryption transactionEncryption = new TransactionEncryption(
-                Util.start0x(account.publicKey),
-                Util.start0x(Hex.toHexString(sig)),
-                Util.start0x(Hex.toHexString(txHash))
+                account.getPublicKey(),
+                Hex.toHexString(sig),
+                Hex.toHexString(txHash)
         );
 
         return transactionEncryption;
@@ -239,7 +284,7 @@ public class Muta {
     // sign a raw transaction and append your sig to given transaction sig (transactionEncryption)
     public TransactionEncryption appendSignedTransaction(RawTransaction rawTransaction, TransactionEncryption transactionEncryption) throws IOException {
         byte[] txHash = Util.keccak256(rawTransaction.encode());
-        if(!Util.start0x(Hex.toHexString(txHash)).equals(transactionEncryption.txHash)){
+        if (!Util.start0x(Hex.toHexString(txHash)).equals(transactionEncryption.txHash)) {
             throw new IOException("RawTransaction's txHash and TransactionEncryption's doesn't match");
         }
 
@@ -250,9 +295,9 @@ public class Muta {
         return transactionEncryption;
     }
 
-    private void checkClient() throws IOException{
-        if(this.client==null){
-            throw new IOException("the client of Muta instance hasn't been set");
+    private void checkClient() throws RuntimeException {
+        if (this.client == null) {
+            throw new RuntimeException("the client of Muta instance hasn't been set");
         }
     }
 }

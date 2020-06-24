@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SetAccountWeightPayload {
-    public VerifySignaturePayload witness;
-    public String multi_sig_address;
-    public String account_address;
-    public int new_weight;
+    private VerifySignaturePayload witness;
+    private String multi_sig_address;
+    private String account_address;
+    private int new_weight;
 }
