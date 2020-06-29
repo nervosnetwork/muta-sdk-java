@@ -12,6 +12,8 @@ import org.nervos.muta.client.type.response.Receipt;
 import org.nervos.muta.client.type.response.ServiceResponse;
 import org.nervos.muta.client.type.response.Transaction;
 import org.nervos.muta.exception.GraphQlError;
+import org.nervos.muta.exception.ReceiptResponseError;
+import org.nervos.muta.exception.ServiceResponseError;
 import org.nervos.muta.util.Util;
 
 import java.io.IOException;
@@ -29,7 +31,7 @@ public class Client {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private OkHttpClient httpClient;
+    private final OkHttpClient httpClient;
 
     public Client(String url) {
         this.url = url;
@@ -48,15 +50,14 @@ public class Client {
         return new Client("http://localhost:8000/graphql");
     }
 
-    public Response send(String payload) throws IOException {
+    protected Response send(String payload) throws IOException {
         RequestBody body = RequestBody.create(payload, APPLICATION_JSON);
         Request request = new Request.Builder().url(url).post(body).build();
-        //System.out.println("client send: "+payload);
         return httpClient.newCall(request).execute();
     }
 
     // parse a graphql result into class
-    public <T> T parse(@NonNull Response response, String operation, Class<T> clazz) throws IOException {
+    protected  <T> T parse(@NonNull Response response, String operation, Class<T> clazz) throws IOException {
         if (response.isSuccessful()) {
 
             if(response.body() == null){
@@ -85,9 +86,9 @@ public class Client {
     }
 
     // parse ServiceResponse's succeedData into class
-    public <T> T parseServiceResponse(ServiceResponse serviceResponse, Class<T> clazz) throws IOException{
+    protected  <T> T parseServiceResponse(ServiceResponse serviceResponse, Class<T> clazz) throws IOException {
         if (!ZERO_UINT8.equals(serviceResponse.getCode()) ){
-            throw new IOException("ServiceResponse code : " + serviceResponse.getCode()+", message : " + serviceResponse.getErrorMessage());
+            throw new ServiceResponseError(serviceResponse.getCode(),serviceResponse.getErrorMessage());
         }
 
         String succeedMsg = serviceResponse.getSucceedData();
@@ -166,8 +167,6 @@ public class Client {
         MutaRequest mutaRequest = new MutaRequest(SendTransactionRequest.operation, new SendTransactionRequest(inputRaw, inputEncryption), SendTransactionRequest.query);
 
         String payload = objectMapper.writeValueAsString(mutaRequest);
-
-        System.out.println("sendTransaction: "+payload);
 
         Response response = this.send(payload);
 

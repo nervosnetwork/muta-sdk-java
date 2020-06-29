@@ -2,51 +2,46 @@ package org.nervos.muta.wallet;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.bitcoinj.crypto.*;
+import org.bouncycastle.util.encoders.Hex;
+import org.nervos.muta.util.Util;
+import org.web3j.crypto.Bip32ECKeyPair;
+import org.web3j.crypto.MnemonicUtils;
+import org.web3j.utils.Numeric;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.web3j.crypto.Bip32ECKeyPair.HARDENED_BIT;
 
 @Data
 @AllArgsConstructor
 public class Wallet {
+    private final byte[] seed;
 
-    public static String HD_PATH = "44H/918H/";
-    public static String HD_PATH_CHARGE_INDEX = "H/0/0";
-
-    private final byte[]  seed;
-    private final DeterministicKey master_node;
-
-    public static Wallet from_mnemonic(List<String> words, String passphrase){
-        byte[] seed = MnemonicCode.toSeed(words,passphrase);
-        DeterministicKey master = HDKeyDerivation.createMasterPrivateKey(seed);
-        return new Wallet(seed,master);
+    public static Wallet from_mnemonic(String mnemonic , String passphrase) {
+        byte[] seed = MnemonicUtils.generateSeed(mnemonic, passphrase);
+        return new Wallet(seed);
     }
 
-    public static Wallet from_mnemonic(List<String> words){
-        return Wallet.from_mnemonic(words,"");
+    public static Wallet from_mnemonic(List<String> words) {
+        return Wallet.from_mnemonic(String.join(" ",words), "");
     }
 
-    public static Wallet from_mnemonic(String wordSentence){
-        List<String> words = Arrays.asList(wordSentence.split(" "));
-        return Wallet.from_mnemonic(words,"");
+    public static Wallet from_mnemonic(String words) {
+        return Wallet.from_mnemonic(words, "");
     }
 
+    public Account derive(int coin_type, int account_index ) {
 
-    public Account derive(int account_index){
-        String path = HD_PATH + account_index + HD_PATH_CHARGE_INDEX;
-        List<ChildNumber> childNumbers = HDUtils.parsePath(path);
-        DeterministicKey node= this.master_node;
-        for (ChildNumber cn : childNumbers) {
-            node = HDKeyDerivation.deriveChildKey(node, cn);
-        }
+        Bip32ECKeyPair pair = Bip32ECKeyPair.generateKeyPair(this.seed);
 
-        if(node == null){
-            throw new RuntimeException("derive error");
-        }
-        String privateKeyHex = node.getPrivateKeyAsHex();
+        // m/44'/918'/0'/0/0
+        // m / purpose' / coin_type' / account' / change / address_index
+        final int[] path = {44 | HARDENED_BIT, coin_type | HARDENED_BIT, account_index | HARDENED_BIT, 0, 0};
 
-        return new Account(privateKeyHex);
+        Bip32ECKeyPair acc = Bip32ECKeyPair.deriveKeyPair(pair, path);
+        byte[] priv = Util.bigIntegerToBytes32(acc.getPrivateKey());
+
+        return new Account(Util.start0x(Hex.toHexString(priv)));
     }
- }
+}

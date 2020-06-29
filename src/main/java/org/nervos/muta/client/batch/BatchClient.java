@@ -78,8 +78,6 @@ public class BatchClient extends Client {
 
         List<BatchQueryResponse> ret =  parse_batch(response, batchQueries);
 
-        System.out.println(this.getObjectMapper().writeValueAsString(ret));
-
         return ret;
     }
 
@@ -90,7 +88,7 @@ public class BatchClient extends Client {
                 throw new GraphQlError("response.body() is null");
             }
 
-            String responseBody = response.body().string();
+            String responseBody = Objects.requireNonNull(response.body()).string();
 
             JsonNode root = this.getObjectMapper().readTree(responseBody);
             if (root.has("errors")) {

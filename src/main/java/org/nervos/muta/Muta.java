@@ -10,7 +10,7 @@ import org.nervos.muta.client.type.MutaRequestOption;
 import org.nervos.muta.client.type.request.RawTransaction;
 import org.nervos.muta.client.type.request.TransactionEncryption;
 import org.nervos.muta.client.type.response.Receipt;
-import org.nervos.muta.exception.ServiceResponseError;
+import org.nervos.muta.exception.ReceiptResponseError;
 import org.nervos.muta.util.Util;
 import org.nervos.muta.wallet.Account;
 
@@ -100,11 +100,7 @@ public class Muta {
 
         byte[] encoded = rawTransaction.encode();
 
-        //System.out.println("encoded: "+Hex.toHexString(encoded));
-
         byte[] txHash = Util.keccak256(encoded);
-
-        //System.out.println("txHash: "+Hex.toHexString(txHash));
 
         TransactionEncryption transactionEncryption = this.signTransaction(rawTransaction);
 
@@ -165,7 +161,7 @@ public class Muta {
         Receipt receipt = client.getReceipt(txHash);
 
         if(!BigInteger.ZERO.equals(new BigInteger(Util.remove0x(receipt.getResponse().getResponse().getCode()),16))){
-            throw new ServiceResponseError(receipt.getResponse().getServiceName(),receipt.getResponse().getMethod(),receipt.getResponse().getResponse().getCode(),receipt.getResponse().getResponse().getErrorMessage());
+            throw new ReceiptResponseError(receipt.getResponse().getServiceName(),receipt.getResponse().getMethod(),receipt.getResponse().getResponse().getCode(),receipt.getResponse().getResponse().getErrorMessage());
         }
 
         if(Util.MutaVoid.class.equals(clazz)){
@@ -185,7 +181,7 @@ public class Muta {
 
                 P ret = getReceiptSucceedData(txHash, clazz);
                 return ret;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 //e.printStackTrace();
             }
 

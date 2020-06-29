@@ -23,8 +23,6 @@ public class TransactionEncryption {
                 RlpString.create(Hex.decode(Util.remove0x(pubkey)))
         ))));
 
-        //System.out.println("pub: "+pub);
-
         this.pubkey = pub;
         this.signature = Util.start0x(Hex.toHexString(RlpEncoder.encode(new RlpList(
                 RlpString.create(Hex.decode(signature))
@@ -34,7 +32,6 @@ public class TransactionEncryption {
 
     public void appendSignatureAndPubkey(TransactionEncryption transactionEncryption){
 
-        System.out.println("this.pubkey: "+ this.pubkey);
         RlpList pubkeys = RlpDecoder.decode( Hex.decode(Util.remove0x(this.pubkey)));
         List<RlpType> pubkeylist = ((RlpList)pubkeys.getValues().get(0)).getValues();
 
@@ -44,7 +41,6 @@ public class TransactionEncryption {
         pubkeylist.addAll(pubkeylist_to_add);
 
         this.pubkey = Util.start0x(Hex.toHexString(RlpEncoder.encode(new RlpList(pubkeylist))));
-        System.out.println("this.pubkey: "+ this.pubkey);
 
         //================
 

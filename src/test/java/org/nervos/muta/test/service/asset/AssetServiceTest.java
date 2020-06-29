@@ -54,6 +54,7 @@ public class AssetServiceTest {
         Assertions.assertEquals(ASSET_SYMBOL, asset.getSymbol());
         asset_id = asset.getId();
         System.out.println("asset id: " + asset_id);
+
     }
 
     @Test
@@ -95,7 +96,7 @@ public class AssetServiceTest {
         long allowance = assetService.getAllowance(asset_id, issuer, another_account_address).getValue();
         Assertions.assertEquals(200, allowance);
 
-        System.out.println("allowance: "+allowance);
+        System.out.println("allowance: " + allowance);
         backupAssetService.transfer_from(
                 asset_id,
                 issuer,
