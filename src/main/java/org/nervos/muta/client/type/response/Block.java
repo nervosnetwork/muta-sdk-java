@@ -3,36 +3,37 @@ package org.nervos.muta.client.type.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.nervos.muta.client.batch.BatchQueryResponse;
 
-import java.util.Vector;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Block {
+public class Block implements BatchQueryResponse {
 
-    public Header header;
-    public Vector<String> orderedTxHashes;
-    public String hash;
+    private Header header;
+    private List<String> orderedTxHashes;
+    private String hash;
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Header{
-        public String chainId;
-        public Vector<String> confirmRoot;
-        public Vector<String> cyclesUsed;
-        public String height;
-        public String execHeight;
-        public String orderRoot;
-        public String prevHash;
-        public String proposer;
-        public Vector<String> receiptRoot;
-        public String stateRoot;
-        public String timestamp;
-        public String validatorVersion;
-        public Proof proof;
-        public Vector<Validator> validators;
+        private String chainId;
+        private List<String> confirmRoot;
+        private List<String> cyclesUsed;
+        private String height;
+        private String execHeight;
+        private String orderRoot;
+        private String prevHash;
+        private String proposer;
+        private List<String> receiptRoot;
+        private String stateRoot;
+        private String timestamp;
+        private String validatorVersion;
+        private Proof proof;
+        private List<Validator> validators;
     }
 
     @Data

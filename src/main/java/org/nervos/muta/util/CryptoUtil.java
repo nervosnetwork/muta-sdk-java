@@ -38,7 +38,7 @@ public class CryptoUtil {
         signer.init(true, privKey);
         BigInteger[] components = signer.generateSignature(data);
 
-        if (components[1].compareTo(HALF_CURVE_ORDER)<=0){
+        if (components[1].compareTo(HALF_CURVE_ORDER)>=0){
             components[1] = CURVE.getN().subtract(components[1]);
         }
 

@@ -10,6 +10,12 @@ repositories {
     jcenter()
 }
 
+
+test {
+    // Use junit platform for unit tests
+    useJUnitPlatform()
+}
+
 dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.7.2"
     implementation "com.squareup.okhttp3:logging-interceptor:4.7.2"
@@ -19,11 +25,21 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.11.0'
 
     //we ONLY use bitcoinj to function bip44
-    implementation group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.8'
-
+    //implementation group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.8'
+    //implementation group: 'org.bouncycastle', name: 'bcprov-debug-jdk15on', version: '1.65'
     implementation group: 'org.web3j', name: 'rlp', version: '5.0.0'
+    implementation group: 'org.web3j', name: 'core', version: '5.0.0'
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    testImplementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 
 }

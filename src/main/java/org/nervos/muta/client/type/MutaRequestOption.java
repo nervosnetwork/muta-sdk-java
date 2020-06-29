@@ -1,26 +1,31 @@
 package org.nervos.muta.client.type;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NonNull;
 
 @AllArgsConstructor
-
+@Data
 public class MutaRequestOption {
 
     @NonNull
-    public String chainId;
+    private String chainId;
 
     @NonNull
-    public String cyclesLimit;
+    private String cyclesLimit;
 
     @NonNull
-    public String cyclesPrice;
+    private String cyclesPrice;
 
     @NonNull
-    public String timeout;
+    private String timeout;
 
     @NonNull
-    public String caller;
+    private String caller;
+
+    private int polling_interval;
+
+    private int polling_times;
 
     public static MutaRequestOption defaultMutaRequestOption(){
         return new MutaRequestOption(
@@ -28,7 +33,9 @@ public class MutaRequestOption {
                 "0xffff",
                 "0x0000",
                 "0x0014",//20decimal
-                "0x0000000000000000000000000000000000000000"
+                "0x0000000000000000000000000000000000000000",
+                3000,
+                10
         );
     }
 }

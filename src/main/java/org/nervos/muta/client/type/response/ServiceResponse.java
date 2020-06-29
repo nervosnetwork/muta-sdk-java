@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ServiceResponse {
 
-        public String code;
-        public String succeedData;
-        public String errorMessage;
+        private String code;
+        private String succeedData;
+        private String errorMessage;
 
 }

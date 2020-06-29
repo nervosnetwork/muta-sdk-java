@@ -1,30 +1,16 @@
 package org.nervos.muta.util;
 
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.crypto.KeyCrypter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
-import org.bouncycastle.jcajce.provider.digest.SHA3;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
-import org.jetbrains.annotations.NotNull;
 
 import java.math.BigInteger;
-import java.security.*;
+import java.security.SecureRandom;
 
 public class Util {
 
     public static final SecureRandom SECURE_RANDOM = new SecureRandom();
-
-    @NotNull
-    public static String BigIntegerToHex(@NotNull BigInteger bigInteger){
-        return "0x"+bigInteger.toString(16);
-    }
-
-    @NotNull
-    public static String StringToHex(String decimal){
-        return "0x"+ new BigInteger(decimal).toString(16);
-    }
-
 
     public static byte[] keccak256(byte[] input) {
 
@@ -42,10 +28,43 @@ public class Util {
     public static String generateRandom32BytesHex(){
         return "0x"+Hex.toHexString(generateRandom32Bytes());
     }
+
     public static String start0x(String input){
         if(!input.startsWith("0x")){
             return "0x" + input;
         }
         return input;
+    }
+
+    public static String remove0x(String input){
+        if(input.startsWith("0x")){
+            return input.substring(2);
+        }
+        return input;
+    }
+
+    public static byte[] bigIntegerToBytes32(BigInteger input){
+        if(input.signum() <= 0){
+            throw new RuntimeException("bigIntegerToBytes32, input is a negative BigInteger");
+        }
+
+        byte[] src = input.toByteArray();
+        byte[] dest = new byte[32];
+        boolean isFirstByteOnlyForSign = src[0] == 0;
+        int length = isFirstByteOnlyForSign ? src.length - 1 : src.length;
+
+        if(length > 32){
+            throw new RuntimeException("bigIntegerToBytes32, input is to long, more than 32 bytes");
+        }
+
+        int srcPos = isFirstByteOnlyForSign ? 1 : 0;
+        int destPos = 32 - length;
+        System.arraycopy(src, srcPos, dest, destPos, length);
+        return dest;
+    }
+
+    @NoArgsConstructor
+    public static class MutaVoid{
+
     }
 }

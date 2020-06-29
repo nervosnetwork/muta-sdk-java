@@ -3,33 +3,36 @@ package org.nervos.muta.client.type.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.nervos.muta.client.batch.BatchQueryResponse;
 
-import java.util.Vector;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Receipt {
-    public String height;
-    public String cyclesUsed;
-    public Vector<Event> events;
-    public String stateRoot;
+public class Receipt implements BatchQueryResponse {
+    private String height;
+    private String cyclesUsed;
+    private List<Event> events;
+    private String stateRoot;
+    private String txHash;
+    private ReceiptResponse response;
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Event{
-        public String service;
-        public String data;
+        private String service;
+        private String data;
     }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ReceiptResponse{
-        public String serviceName;
-        public String method;
-        public ServiceResponse response;
+        private String serviceName;
+        private String method;
+        private ServiceResponse response;
     }
 
 }
