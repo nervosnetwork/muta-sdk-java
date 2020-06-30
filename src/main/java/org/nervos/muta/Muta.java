@@ -71,7 +71,10 @@ public class Muta {
 
     //queryService with given payload
     public <T, P> T queryService(@NonNull String serviceName, @NonNull String method, @NonNull P payloadData, Class<T> clazz) throws IOException {
-        String payload = this.objectMapper.writeValueAsString(payloadData);
+        String payload = null;
+        if(payloadData != null){
+            payload = this.objectMapper.writeValueAsString(payloadData);
+        }
         T ret = this.queryService(serviceName, method, payload, null, null, null, null, clazz);
         return ret;
     }
