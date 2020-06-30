@@ -47,7 +47,7 @@ public class MultiSigService {
     }
 
     public void verify_signature(SignedTransaction signedTransaction) throws IOException {
-        muta.queryService(SERVICE_NAME, METHOD_VERIFY_SIGNATURE, signedTransaction, Void.class);
+        muta.queryService(SERVICE_NAME, METHOD_VERIFY_SIGNATURE, signedTransaction, Util.MutaVoid.class);
     }
 
     public void change_owner(ChangeOwnerPayload changeOwnerPayload) throws IOException {
@@ -59,7 +59,7 @@ public class MultiSigService {
     public void change_memo(ChangeMemoPayload changeMemoPayload) throws IOException {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_CHANGE_MEMO,
                 changeMemoPayload,
-                Void.class
+                Util.MutaVoid.class
         );
     }
 
