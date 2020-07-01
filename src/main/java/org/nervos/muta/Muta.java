@@ -1,5 +1,6 @@
 package org.nervos.muta;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.NonNull;
@@ -9,8 +10,11 @@ import org.nervos.muta.client.Client;
 import org.nervos.muta.client.type.MutaRequestOption;
 import org.nervos.muta.client.type.request.RawTransaction;
 import org.nervos.muta.client.type.request.TransactionEncryption;
+import org.nervos.muta.client.type.response.Block;
 import org.nervos.muta.client.type.response.Receipt;
+import org.nervos.muta.client.type.response.ServiceResponse;
 import org.nervos.muta.exception.ReceiptResponseError;
+import org.nervos.muta.exception.ServiceResponseError;
 import org.nervos.muta.util.Util;
 import org.nervos.muta.wallet.Account;
 
@@ -28,6 +32,9 @@ public class Muta {
 
     public Muta(Client client, Account account, MutaRequestOption defaultReqOption) {
 
+        if(client == null){
+            log.warn("you are in offline mode");
+        }
 
         if (account == null) {
             account = Account.defaultAccount();
@@ -48,34 +55,42 @@ public class Muta {
         return new Muta(Client.defaultClient(), null, null);
     }
 
-    public <T> T queryService(@NonNull String serviceName, @NonNull String method, String payload, String height, String caller, String cyclePrice, String cycleLimit, Class<T> clazz) throws IOException {
-        if (payload == null) {
-            payload = "";
-        }
+    public BigInteger getLatestHeight() throws IOException{
+        checkClient();
+        Block block = client.getBlock(null);
+        return new BigInteger(Util.remove0x(block.getHeader().getHeight()),16);
+    }
+
+
+    //it's
+    public <T> T queryService(@NonNull String serviceName, @NonNull String method, String payload, String height, String caller, String cyclePrice, String cycleLimit, TypeReference<T> tr) throws IOException {
+
         if (caller == null) {
             caller = mutaRequestOption.getCaller();
         }
-
         checkClient();
 
-        T ret = this.client.queryService(serviceName, method, payload, height, caller, cyclePrice, cycleLimit, clazz);
+        ServiceResponse serviceResponse = client.queryService(serviceName, method, payload, height, caller, cyclePrice, cycleLimit);
+        T ret = parseServiceResponse(serviceResponse, tr);
         return ret;
     }
 
     //queryService without payload
-    public <T> T queryService(@NonNull String serviceName, @NonNull String method, Class<T> clazz) throws IOException {
+    public <T> T queryService(@NonNull String serviceName, @NonNull String method, TypeReference<T> tr) throws IOException {
 
-        T ret = this.queryService(serviceName, method, null, null, null, null, null, clazz);
+        T ret = this.queryService(serviceName, method, null, null, null, null, null, tr);
         return ret;
     }
 
     //queryService with given payload
-    public <T, P> T queryService(@NonNull String serviceName, @NonNull String method, @NonNull P payloadData, Class<T> clazz) throws IOException {
+    public <T, P> T queryService(@NonNull String serviceName, @NonNull String method, P payloadData, TypeReference<T> tr) throws IOException {
+        //null point will marshal to null
         String payload = null;
-        if(payloadData != null){
-            payload = this.objectMapper.writeValueAsString(payloadData);
+        if(payloadData!=null){
+             payload = this.objectMapper.writeValueAsString(payloadData);
         }
-        T ret = this.queryService(serviceName, method, payload, null, null, null, null, clazz);
+
+        T ret = this.queryService(serviceName, method, payload, null, null, null, null, tr);
         return ret;
     }
 
@@ -141,7 +156,7 @@ public class Muta {
     public <P, R> R sendTransactionAndPollResult(@NonNull String serviceName,
                                                  @NonNull String method,
                                                  P payloadData,
-                                                 Class<R> clazz) throws IOException {
+                                                 TypeReference<R> tr) throws IOException {
         String payload = this.objectMapper.writeValueAsString(payloadData);
 
         String txHash = this.sendTransaction(null,
@@ -153,39 +168,44 @@ public class Muta {
                 method,
                 payload
         );
-
-        return getReceiptSucceedDataRetry(txHash, clazz);
+       log.debug("send txhash: "+ txHash);
+        return getReceiptSucceedDataRetry(txHash, tr);
     }
 
+
     // while receipt is ready but the service response is error, thrown runtime exception
-    public <R> R getReceiptSucceedData(String txHash, Class<R> clazz) throws IOException {
+    public <R> R getReceiptSucceedData(String txHash, TypeReference<R> tr) throws IOException {
         checkClient();
 
         Receipt receipt = client.getReceipt(txHash);
 
         if(!BigInteger.ZERO.equals(new BigInteger(Util.remove0x(receipt.getResponse().getResponse().getCode()),16))){
+            log.debug("getReceiptSucceedData error: "+ objectMapper.writeValueAsString(receipt));
             throw new ReceiptResponseError(receipt.getResponse().getServiceName(),receipt.getResponse().getMethod(),receipt.getResponse().getResponse().getCode(),receipt.getResponse().getResponse().getErrorMessage());
         }
 
-        if(Util.MutaVoid.class.equals(clazz)){
-            return (R)new Util.MutaVoid();
+        try{
+            R ret = parseServiceResponse(receipt.getResponse().getResponse(),tr);
+            return ret;
+        }catch (ServiceResponseError e){
+            throw new ReceiptResponseError(receipt.getResponse().getServiceName(),receipt.getResponse().getMethod(),receipt.getResponse().getResponse().getCode(),receipt.getResponse().getResponse().getErrorMessage());
         }
-
-        R ret = objectMapper.readValue(receipt.getResponse().getResponse().getSucceedData(), clazz);
-
-        return ret;
+        catch (IOException e){
+            throw e;
+        }
     }
 
-    public <P> P getReceiptSucceedDataRetry(String txHash, Class<P> clazz) throws IOException {
+    public <P> P getReceiptSucceedDataRetry(String txHash, TypeReference<P> tr) throws IOException {
         int times = this.mutaRequestOption.getPolling_times();
         while (times > 0) {
 
             try {
 
-                P ret = getReceiptSucceedData(txHash, clazz);
+                P ret = getReceiptSucceedData(txHash, tr);
                 return ret;
             } catch (Exception e) {
                 //e.printStackTrace();
+                System.out.println(e);
             }
 
             try {
@@ -197,7 +217,7 @@ public class Muta {
             times--;
         }
 
-        throw new IOException("getReceipt() fails to retrieve tx data");
+        throw new IOException("getReceipt() fails to retrieve tx data by "+ this.mutaRequestOption.getPolling_times()+" times");
     }
 
     public <P> RawTransaction compose(@NonNull String serviceName, @NonNull String method, P payloadData,String sender) throws IOException {
@@ -239,7 +259,7 @@ public class Muta {
 
         if (timeout == null) {
             checkClient();
-            BigInteger latestHeight = this.client.getLatestHeight();
+            BigInteger latestHeight = this.getLatestHeight();
             timeout = Util.start0x(new BigInteger(Util.remove0x(mutaRequestOption.getTimeout()), 16).add(latestHeight).toString(16));
         }
         if (payload == null) {
@@ -264,6 +284,7 @@ public class Muta {
 
         return rawTransaction;
     }
+
 
     // sign a raw transaction, do nothing more
     public TransactionEncryption signTransaction(RawTransaction rawTransaction) {
@@ -299,4 +320,23 @@ public class Muta {
             throw new RuntimeException("the client of Muta instance hasn't been set");
         }
     }
+
+    // parse ServiceResponse's succeedData into class
+    protected  <T> T parseServiceResponse(ServiceResponse serviceResponse, TypeReference<T> tr) throws IOException {
+        if (!new BigInteger(Util.remove0x(serviceResponse.getCode())).equals(BigInteger.ZERO) ){
+            throw new ServiceResponseError(serviceResponse.getCode(),serviceResponse.getErrorMessage());
+        }
+
+        String succeedMsg = serviceResponse.getSucceedData();
+
+        //it's weird design for muta
+        if("".equals(succeedMsg)){
+            succeedMsg="null";
+        }
+
+        T ret = objectMapper.readValue(succeedMsg,tr);
+        return ret;
+    }
+
+
 }

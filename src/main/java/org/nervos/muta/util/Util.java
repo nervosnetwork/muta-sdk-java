@@ -62,9 +62,4 @@ public class Util {
         System.arraycopy(src, srcPos, dest, destPos, length);
         return dest;
     }
-
-    @NoArgsConstructor
-    public static class MutaVoid{
-
-    }
 }

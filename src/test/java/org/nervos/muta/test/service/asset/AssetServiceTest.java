@@ -1,6 +1,7 @@
 package org.nervos.muta.test.service.asset;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.nervos.muta.Muta;
 import org.nervos.muta.client.Client;
@@ -10,6 +11,7 @@ import org.nervos.muta.wallet.Account;
 
 import java.io.IOException;
 
+@Slf4j
 @Data
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AssetServiceTest {
@@ -53,8 +55,7 @@ public class AssetServiceTest {
         Assertions.assertEquals(issuer, asset.getIssuer());
         Assertions.assertEquals(ASSET_SYMBOL, asset.getSymbol());
         asset_id = asset.getId();
-        System.out.println("asset id: " + asset_id);
-
+        log.info("asset id: " + asset_id);
     }
 
     @Test
@@ -96,7 +97,7 @@ public class AssetServiceTest {
         long allowance = assetService.getAllowance(asset_id, issuer, another_account_address).getValue();
         Assertions.assertEquals(200, allowance);
 
-        System.out.println("allowance: " + allowance);
+        log.debug("allowance: " + allowance);
         backupAssetService.transfer_from(
                 asset_id,
                 issuer,

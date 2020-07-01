@@ -1,7 +1,6 @@
 package org.nervos.muta.service.asset;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.nervos.muta.Muta;
@@ -30,55 +29,64 @@ public class AssetService {
                         name,
                         symbol,
                         supply),
-                Asset.class
-                );
+                new TypeReference<Asset>() {
+                }
+        );
 
         return asset;
     }
 
     public Asset getAsset(String id) throws IOException {
-        Asset ret = muta.queryService(SERVICE_NAME,METHOD_GET_ASSET,new GetAssetPayload(
+        Asset ret = muta.queryService(SERVICE_NAME, METHOD_GET_ASSET, new GetAssetPayload(
                 id
-        ),Asset.class);
+        ), new TypeReference<Asset>() {
+        });
         return ret;
     }
 
-    public GetBalanceResponse getBalance(String asset_id,String user) throws IOException{
-        GetBalanceResponse ret = muta.queryService(SERVICE_NAME,METHOD_GET_BALANCE,new GetBalancePayload(
+    public GetBalanceResponse getBalance(String asset_id, String user) throws IOException {
+        GetBalanceResponse ret = muta.queryService(SERVICE_NAME, METHOD_GET_BALANCE, new GetBalancePayload(
                 asset_id, user
-        ),GetBalanceResponse.class);
+        ), new TypeReference<GetBalanceResponse>() {
+        });
         return ret;
     }
 
-    public GetAllowanceResponse getAllowance(String asset_id,String grantor,String grantee) throws IOException{
-        GetAllowanceResponse ret = muta.queryService(SERVICE_NAME,METHOD_GET_ALLOWANCE,new GetAllowancePayload(
-                asset_id, grantor,grantee
-        ),GetAllowanceResponse.class);
+    public GetAllowanceResponse getAllowance(String asset_id, String grantor, String grantee) throws IOException {
+        GetAllowanceResponse ret = muta.queryService(SERVICE_NAME, METHOD_GET_ALLOWANCE, new GetAllowancePayload(
+                asset_id, grantor, grantee
+        ), new TypeReference<GetAllowanceResponse>() {
+        });
         return ret;
     }
 
-    public void transfer(String asset_id, String to, long value) throws IOException{
+    public void transfer(String asset_id, String to, long value) throws IOException {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_TRANSFER,
                 new TransferPayload(
                         asset_id, to, value
-                ),Util.MutaVoid.class
+                ),
+                new TypeReference<Void>() {
+                }
+
         );
     }
 
-    public void approve(String asset_id,String to, long value) throws IOException{
+    public void approve(String asset_id, String to, long value) throws IOException {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_APPROVE,
                 new TransferPayload(
                         asset_id, to, value
                 ),
-                Util.MutaVoid.class
+                new TypeReference<Void>() {
+                }
         );
     }
 
-    public void transfer_from(String asset_id,String sender,String recipient,long value) throws IOException{
+    public void transfer_from(String asset_id, String sender, String recipient, long value) throws IOException {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_TRANSFER_FROM,
                 new TransferFromPayload(
                         asset_id, sender, recipient, value
-                ),Util.MutaVoid.class
+                ), new TypeReference<Void>() {
+                }
         );
     }
 

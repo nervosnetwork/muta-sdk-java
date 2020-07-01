@@ -1,6 +1,8 @@
 package org.nervos.muta.test.service.multi_sig;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.nervos.muta.Muta;
 import org.nervos.muta.client.Client;
@@ -19,6 +21,7 @@ import org.nervos.muta.wallet.Account;
 import java.io.IOException;
 import java.util.Arrays;
 
+@Slf4j
 @Data
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MultiSigServiceTest {
@@ -42,7 +45,7 @@ public class MultiSigServiceTest {
                 null
         ));
         account1addr = account1.getMuta().getAccount().getAddress();
-        System.out.println(account1addr);
+        log.debug(account1addr);
 
         account2 = new MultiSigService(new Muta(
                 Client.defaultClient(),
@@ -50,7 +53,7 @@ public class MultiSigServiceTest {
                 null
         ));
         account2addr = account2.getMuta().getAccount().getAddress();
-        System.out.println(account2addr);
+        log.debug(account2addr);
 
         account3 = new MultiSigService(new Muta(
                 Client.defaultClient(),
@@ -58,7 +61,7 @@ public class MultiSigServiceTest {
                 null
         ));
         account3addr = account3.getMuta().getAccount().getAddress();
-        System.out.println(account3addr);
+        log.debug(account3addr);
 
     }
 
@@ -109,7 +112,7 @@ public class MultiSigServiceTest {
 
         String txHash = account1.getMuta().sendTransaction(rawTransaction, transactionEncryption);
 
-        Asset asset = account1.getMuta().getReceiptSucceedDataRetry(txHash, Asset.class);
+        Asset asset = account1.getMuta().getReceiptSucceedDataRetry(txHash, new TypeReference<Asset>() {});
         Assertions.assertEquals(multi_sig_account, asset.getIssuer());
     }
 

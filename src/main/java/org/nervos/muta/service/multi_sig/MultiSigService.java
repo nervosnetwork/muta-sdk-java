@@ -1,8 +1,13 @@
 package org.nervos.muta.service.multi_sig;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.nervos.muta.Muta;
+import org.nervos.muta.service.asset.type.GetAllowanceResponse;
 import org.nervos.muta.service.multi_sig.type.*;
 import org.nervos.muta.util.Util;
 
@@ -33,7 +38,7 @@ public class MultiSigService {
                         addr_with_weight,
                         threshold,
                         memo),
-                GenerateMultiSigAccountResponse.class
+                new TypeReference<GenerateMultiSigAccountResponse>() {}
         );
 
         return ret;
@@ -42,37 +47,37 @@ public class MultiSigService {
     public GetMultiSigAccountResponse get_account_from_address(String multi_sig_address) throws IOException {
         GetMultiSigAccountResponse ret = muta.queryService(SERVICE_NAME, METHOD_GET_ACCOUNT_FROM_ADDRESS, new GetMultiSigAccountPayload(
                 multi_sig_address
-        ), GetMultiSigAccountResponse.class);
+        ),new TypeReference<GetMultiSigAccountResponse>(){});
         return ret;
     }
 
     public void verify_signature(SignedTransaction signedTransaction) throws IOException {
-        muta.queryService(SERVICE_NAME, METHOD_VERIFY_SIGNATURE, signedTransaction, Util.MutaVoid.class);
+        muta.queryService(SERVICE_NAME, METHOD_VERIFY_SIGNATURE, signedTransaction, new TypeReference<Void>(){});
     }
 
     public void change_owner(ChangeOwnerPayload changeOwnerPayload) throws IOException {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_CHANGE_OWNER,
-                changeOwnerPayload, Util.MutaVoid.class
+                changeOwnerPayload, new TypeReference<Void>(){}
         );
     }
 
     public void change_memo(ChangeMemoPayload changeMemoPayload) throws IOException {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_CHANGE_MEMO,
                 changeMemoPayload,
-                Util.MutaVoid.class
+                new TypeReference<Void>(){}
         );
     }
 
     public void add_account(AddAccountPayload addAccountPayload) throws IOException {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_ADD_ACCOUNT,
-                addAccountPayload,Util.MutaVoid.class
+                addAccountPayload,new TypeReference<Void>(){}
         );
     }
 
     public Account remove_account(RemoveAccountPayload removeAccountPayload) throws IOException {
         Account ret = muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_REMOVE_ACCOUNT,
                 removeAccountPayload,
-                Account.class
+                new TypeReference<Account>(){}
         );
         return ret;
     }
@@ -80,14 +85,14 @@ public class MultiSigService {
     public void set_account_weight(SetAccountWeightPayload setAccountWeightPayload) throws IOException {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_SET_ACCOUNT_WEIGHT,
                 setAccountWeightPayload,
-                Account.class
+                new TypeReference<Account>(){}
         );
     }
 
     public void set_threshold(SetThresholdPayload setThresholdPayload) throws IOException {
         muta.sendTransactionAndPollResult(SERVICE_NAME, METHOD_SET_THRESHOLD,
                 setThresholdPayload,
-                Account.class
+                new TypeReference<Account>(){}
         );
     }
 }
