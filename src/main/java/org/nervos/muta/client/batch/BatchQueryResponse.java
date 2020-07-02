@@ -1,4 +1,3 @@
 package org.nervos.muta.client.batch;
 
-public interface BatchQueryResponse {
-}
+public interface BatchQueryResponse {}
