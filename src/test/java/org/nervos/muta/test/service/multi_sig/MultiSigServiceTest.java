@@ -1,116 +1,132 @@
 package org.nervos.muta.test.service.multi_sig;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.IOException;
+import java.util.Arrays;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.nervos.muta.Muta;
 import org.nervos.muta.client.Client;
-import org.nervos.muta.client.type.request.RawTransaction;
-import org.nervos.muta.client.type.request.TransactionEncryption;
+import org.nervos.muta.client.type.graphql_schema_scalar.Address;
+import org.nervos.muta.client.type.graphql_schema_scalar.Hash;
+import org.nervos.muta.client.type.primitive.U32;
+import org.nervos.muta.client.type.primitive.U64;
+import org.nervos.muta.client.type.primitive.U8;
+import org.nervos.muta.client.type.request.InputRawTransaction;
+import org.nervos.muta.client.type.request.InputTransactionEncryption;
 import org.nervos.muta.service.asset.AssetService;
 import org.nervos.muta.service.asset.type.Asset;
 import org.nervos.muta.service.asset.type.CreateAssetPayload;
 import org.nervos.muta.service.multi_sig.MultiSigService;
-import org.nervos.muta.service.multi_sig.type.AddressWithWeight;
-import org.nervos.muta.service.multi_sig.type.ChangeOwnerPayload;
-import org.nervos.muta.service.multi_sig.type.GenerateMultiSigAccountResponse;
-import org.nervos.muta.service.multi_sig.type.GetMultiSigAccountResponse;
+import org.nervos.muta.service.multi_sig.type.*;
 import org.nervos.muta.wallet.Account;
 
-import java.io.IOException;
-import java.util.Arrays;
-
+@Slf4j
 @Data
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MultiSigServiceTest {
 
-    private static MultiSigService account1;
-    private static MultiSigService account2;
-    private static MultiSigService account3;
-    private static String account1addr;
-    private static String account2addr;
-    private static String account3addr;
-    private static String multi_sig_account;
+  private static MultiSigService account1;
+  private static MultiSigService account2;
+  private static MultiSigService account3;
+  private static Address account1addr;
+  private static Address account2addr;
+  private static Address account3addr;
+  private static Address multi_sig_account;
 
-    private static String asset_name = "MultiAsset";
-    private static String asset_symbol = "MAS";
-    private static long asset_supply = 1000;
+  private static String asset_name = "MultiAsset";
+  private static String asset_symbol = "MAS";
+  private static U64 asset_supply = U64.fromLong(1000);
 
-    public MultiSigServiceTest() {
-        account1 = new MultiSigService(new Muta(
+  public MultiSigServiceTest() {
+    account1 =
+        new MultiSigService(
+            new Muta(
                 Client.defaultClient(),
-                new Account("0x0000000000000000000000000000000000000000000000000000000000000001"),
-                null
-        ));
-        account1addr = account1.getMuta().getAccount().getAddress();
-        System.out.println(account1addr);
+                Account.fromHexString(
+                    "0x0000000000000000000000000000000000000000000000000000000000000001"),
+                null));
+    account1addr = account1.getMuta().getAccount().getAddress();
+    log.debug(account1addr.toString());
 
-        account2 = new MultiSigService(new Muta(
+    account2 =
+        new MultiSigService(
+            new Muta(
                 Client.defaultClient(),
-                new Account("0x0000000000000000000000000000000000000000000000000000000000000002"),
-                null
-        ));
-        account2addr = account2.getMuta().getAccount().getAddress();
-        System.out.println(account2addr);
+                Account.fromHexString(
+                    "0x0000000000000000000000000000000000000000000000000000000000000002"),
+                null));
+    account2addr = account2.getMuta().getAccount().getAddress();
+    log.debug(account2addr.toString());
 
-        account3 = new MultiSigService(new Muta(
+    account3 =
+        new MultiSigService(
+            new Muta(
                 Client.defaultClient(),
-                new Account("0x0000000000000000000000000000000000000000000000000000000000000003"),
-                null
-        ));
-        account3addr = account3.getMuta().getAccount().getAddress();
-        System.out.println(account3addr);
+                Account.fromHexString(
+                    "0x0000000000000000000000000000000000000000000000000000000000000003"),
+                null));
+    account3addr = account3.getMuta().getAccount().getAddress();
+    log.debug(account3addr.toString());
+  }
 
-    }
+  @Test
+  @Order(1)
+  public void generate_account() throws IOException {
+    GenerateMultiSigAccountResponse generateMultiSigAccountResponse =
+        account1.generate_account(
+            new GenerateMultiSigAccountPayload(
+                account1addr,
+                Arrays.asList(
+                    new AddressWithWeight(account1addr, U8.fromLong(5)),
+                    new AddressWithWeight(account2addr, U8.fromLong(5))),
+                U32.fromLong(10),
+                "test_multisig"));
 
-    @Test
-    @Order(1)
-    public void generate_account() throws IOException {
-        GenerateMultiSigAccountResponse generateMultiSigAccountResponse = account1.generate_account(
-                account1addr, Arrays.asList(
-                        new AddressWithWeight(account1addr, 5),
-                        new AddressWithWeight(account2addr, 5)
-                ), 10, "test_multisig"
-        );
+    multi_sig_account = generateMultiSigAccountResponse.getAddress();
+  }
 
-        multi_sig_account = generateMultiSigAccountResponse.getAddress();
-    }
+  @Test
+  @Order(2)
+  public void get_account_from_address() throws IOException {
+    GetMultiSigAccountResponse getMultiSigAccountResponse =
+        account1.get_account_from_address(new GetMultiSigAccountPayload(multi_sig_account));
+    MultiSigPermission permission = getMultiSigAccountResponse.getPermission();
+    Assertions.assertEquals(2, permission.getAccounts().size());
+    Assertions.assertEquals(U8.fromLong(5), permission.getAccounts().get(0).getWeight());
+    Assertions.assertEquals(U8.fromLong(5), permission.getAccounts().get(1).getWeight());
+    Assertions.assertEquals(account1addr, permission.getAccounts().get(0).getAddress());
+    Assertions.assertEquals(account2addr, permission.getAccounts().get(1).getAddress());
+    Assertions.assertFalse(permission.getAccounts().get(0).is_multiple());
+    Assertions.assertFalse(permission.getAccounts().get(1).is_multiple());
+    Assertions.assertEquals(account1addr, permission.getOwner());
+    Assertions.assertEquals(U32.fromLong(10), permission.getThreshold());
+    Assertions.assertEquals("test_multisig", permission.getMemo());
+  }
 
-    @Test
-    @Order(2)
-    public void get_account_from_address() throws IOException {
-        GetMultiSigAccountResponse getMultiSigAccountResponse = account1.get_account_from_address(multi_sig_account);
-        GetMultiSigAccountResponse.MultiSigPermission permission = getMultiSigAccountResponse.getPermission();
-        Assertions.assertEquals(2, permission.getAccounts().size());
-        Assertions.assertEquals(5, permission.getAccounts().get(0).getWeight());
-        Assertions.assertEquals(5, permission.getAccounts().get(1).getWeight());
-        Assertions.assertEquals(account1addr, permission.getAccounts().get(0).getAddress());
-        Assertions.assertEquals(account2addr, permission.getAccounts().get(1).getAddress());
-        Assertions.assertEquals(false, permission.getAccounts().get(0).is_multiple());
-        Assertions.assertEquals(false, permission.getAccounts().get(1).is_multiple());
-        Assertions.assertEquals(account1addr, permission.getOwner());
-        Assertions.assertEquals(10, permission.getThreshold());
-        Assertions.assertEquals("test_multisig", permission.getMemo());
+  @Test
+  @Order(3)
+  public void test_multisig_by_create_asset() throws IOException {
+    InputRawTransaction inputRawTransaction =
+        account1
+            .getMuta()
+            .compose(
+                AssetService.SERVICE_NAME,
+                AssetService.METHOD_CREATE_ASSET,
+                new CreateAssetPayload(asset_name, asset_symbol, asset_supply),
+                multi_sig_account);
+    InputTransactionEncryption inputTransactionEncryption =
+        account1.getMuta().signTransaction(inputRawTransaction);
 
-    }
+    inputTransactionEncryption =
+        account2.getMuta().appendSignedTransaction(inputRawTransaction, inputTransactionEncryption);
 
-    @Test
-    @Order(3)
-    public void test_multisig_by_create_asset() throws IOException {
-        RawTransaction rawTransaction = account1.getMuta().compose(AssetService.SERVICE_NAME, AssetService.METHOD_CREATE_ASSET,
-                new CreateAssetPayload(
-                        asset_name,
-                        asset_symbol,
-                        asset_supply),
-                multi_sig_account
-        );
-        TransactionEncryption transactionEncryption = account1.getMuta().signTransaction(rawTransaction);
+    Hash txHash =
+        account1.getMuta().sendTransaction(inputRawTransaction, inputTransactionEncryption);
 
-        transactionEncryption = account2.getMuta().appendSignedTransaction(rawTransaction, transactionEncryption);
-
-        String txHash = account1.getMuta().sendTransaction(rawTransaction, transactionEncryption);
-
-        Asset asset = account1.getMuta().getReceiptSucceedDataRetry(txHash, Asset.class);
-        Assertions.assertEquals(multi_sig_account, asset.getIssuer());
-    }
-
+    Asset asset =
+        account1.getMuta().getReceiptSucceedDataRetry(txHash, new TypeReference<Asset>() {});
+    Assertions.assertEquals(multi_sig_account, asset.getIssuer());
+  }
 }
