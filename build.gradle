@@ -28,14 +28,10 @@ dependencies {
     api "com.squareup.okhttp3:logging-interceptor:4.7.2"
 
     api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.0'
-    api group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.11.0'
-    api group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.11.0'
 
-    //implementation group: 'org.bouncycastle', name: 'bcprov-debug-jdk15on', version: '1.65'
+    //implementation group: 'org.bouncycastle', name: 'bcprov-debug-jdk15on', version: '1.65' // included by org.web3j:rlp
     implementation group: 'org.web3j', name: 'rlp', version: '5.0.0'
     implementation group: 'org.web3j', name: 'core', version: '5.0.0'
-
-    compile group: 'com.google.googlejavaformat', name: 'google-java-format', version: '1.8'
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.12'

@@ -64,7 +64,7 @@ public class Client {
     if (response.isSuccessful()) {
 
       if (response.body() == null) {
-        throw new GraphQlError("response.body() is null");
+        throw new IOException("HTTP response.body() is null");
       }
 
       String responseBody = response.body().string();
