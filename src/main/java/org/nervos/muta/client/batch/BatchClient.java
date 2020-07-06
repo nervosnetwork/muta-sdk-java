@@ -84,7 +84,7 @@ public class BatchClient extends Client {
     if (response.isSuccessful()) {
 
       if (response.body() == null) {
-        throw new GraphQlError("response.body() is null");
+        throw new IOException("HTTP response.body() is null");
       }
 
       String responseBody = Objects.requireNonNull(response.body()).string();
