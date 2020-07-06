@@ -23,6 +23,9 @@ test {
     useJUnitPlatform()
 }
 
+build.dependsOn(tasks.googleJavaFormat)
+verifyGoogleJavaFormat.mustRunAfter(tasks.googleJavaFormat)
+
 dependencies {
     api "com.squareup.okhttp3:okhttp:4.7.2"
     api "com.squareup.okhttp3:logging-interceptor:4.7.2"
