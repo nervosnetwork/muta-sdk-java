@@ -9,7 +9,7 @@ import org.nervos.muta.client.type.primitive.U64;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateAssetPayload {
-  private String name;
-  private String symbol;
-  private U64 supply;
+    private String name;
+    private String symbol;
+    private U64 supply;
 }

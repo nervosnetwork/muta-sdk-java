@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class MutaRequest {
 
-  private String operationName;
-  private Object variables;
-  private String query;
+    private String operationName;
+    private Object variables;
+    private String query;
 }

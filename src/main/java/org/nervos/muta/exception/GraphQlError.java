@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class GraphQlError extends RuntimeException {
 
-  public GraphQlError(String msg) {
-    super(msg);
-  }
+    public GraphQlError(String msg) {
+        super(msg);
+    }
 }

@@ -13,55 +13,58 @@ import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.math.ec.FixedPointCombMultiplier;
 
 public class CryptoUtil {
-  public static final X9ECParameters CURVE_PARAMS = CustomNamedCurves.getByName("secp256k1");
-  public static final ECDomainParameters CURVE =
-      new ECDomainParameters(
-          CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(), CURVE_PARAMS.getN(), CURVE_PARAMS.getH());
-  static final BigInteger HALF_CURVE_ORDER = CURVE_PARAMS.getN().shiftRight(1);
+    public static final X9ECParameters CURVE_PARAMS = CustomNamedCurves.getByName("secp256k1");
+    public static final ECDomainParameters CURVE =
+            new ECDomainParameters(
+                    CURVE_PARAMS.getCurve(),
+                    CURVE_PARAMS.getG(),
+                    CURVE_PARAMS.getN(),
+                    CURVE_PARAMS.getH());
+    static final BigInteger HALF_CURVE_ORDER = CURVE_PARAMS.getN().shiftRight(1);
 
-  public static ECPoint publicPoint(BigInteger privateKey) {
-    if (privateKey.bitLength() > CURVE.getN().bitLength()) {
-      privateKey = privateKey.mod(CURVE.getN());
-    }
-    ECPoint ecPoint = new FixedPointCombMultiplier().multiply(CURVE.getG(), privateKey);
-    return ecPoint;
-  }
-
-  public static byte[] sign(BigInteger privateKey, byte[] data) {
-    ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
-
-    ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(privateKey, CryptoUtil.CURVE);
-    signer.init(true, privKey);
-    BigInteger[] components = signer.generateSignature(data);
-
-    if (components[1].compareTo(HALF_CURVE_ORDER) >= 0) {
-      components[1] = CURVE.getN().subtract(components[1]);
+    public static ECPoint publicPoint(BigInteger privateKey) {
+        if (privateKey.bitLength() > CURVE.getN().bitLength()) {
+            privateKey = privateKey.mod(CURVE.getN());
+        }
+        ECPoint ecPoint = new FixedPointCombMultiplier().multiply(CURVE.getG(), privateKey);
+        return ecPoint;
     }
 
-    byte[] r = convertBigIntegerToBytes32(components[0]);
-    byte[] s = convertBigIntegerToBytes32(components[1]);
+    public static byte[] sign(BigInteger privateKey, byte[] data) {
+        ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
 
-    byte[] sig = new byte[64];
-    System.arraycopy(r, 0, sig, 0, 32);
-    System.arraycopy(s, 0, sig, 32, 32);
+        ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(privateKey, CryptoUtil.CURVE);
+        signer.init(true, privKey);
+        BigInteger[] components = signer.generateSignature(data);
 
-    return sig;
-  }
+        if (components[1].compareTo(HALF_CURVE_ORDER) >= 0) {
+            components[1] = CURVE.getN().subtract(components[1]);
+        }
 
-  public static byte[] convertBigIntegerToBytes32(BigInteger bi) {
-    byte[] ret = new byte[32];
-    byte[] input = bi.toByteArray();
+        byte[] r = convertBigIntegerToBytes32(components[0]);
+        byte[] s = convertBigIntegerToBytes32(components[1]);
 
-    if (input[0] == 0x00) {
-      input = Arrays.copyOfRange(input, 1, input.length);
+        byte[] sig = new byte[64];
+        System.arraycopy(r, 0, sig, 0, 32);
+        System.arraycopy(s, 0, sig, 32, 32);
+
+        return sig;
     }
 
-    if (input.length > 32) {
-      throw new RuntimeException(
-          "convertBigIntegerToBytes32, length is to long: " + bi.toString(16));
-    }
+    public static byte[] convertBigIntegerToBytes32(BigInteger bi) {
+        byte[] ret = new byte[32];
+        byte[] input = bi.toByteArray();
 
-    System.arraycopy(input, 0, ret, 32 - input.length, 32);
-    return ret;
-  }
+        if (input[0] == 0x00) {
+            input = Arrays.copyOfRange(input, 1, input.length);
+        }
+
+        if (input.length > 32) {
+            throw new RuntimeException(
+                    "convertBigIntegerToBytes32, length is to long: " + bi.toString(16));
+        }
+
+        System.arraycopy(input, 0, ret, 32 - input.length, 32);
+        return ret;
+    }
 }

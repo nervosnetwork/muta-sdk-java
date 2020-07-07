@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RemoveVerifiedItemPayload {
-  private String service_name;
+    private String service_name;
 }

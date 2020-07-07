@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetMultiSigAccountResponse {
-  private MultiSigPermission permission;
+    private MultiSigPermission permission;
 }

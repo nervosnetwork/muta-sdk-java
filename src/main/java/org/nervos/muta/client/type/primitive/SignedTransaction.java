@@ -12,8 +12,8 @@ inside Muta. Here we expose this class because you can use it in Multi_Sig servi
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignedTransaction {
-  private RawTransaction raw;
-  private String tx_hash;
-  private String pubkey;
-  private String signature;
+    private RawTransaction raw;
+    private Hash tx_hash;
+    private Byte pubkey;
+    private String signature;
 }
