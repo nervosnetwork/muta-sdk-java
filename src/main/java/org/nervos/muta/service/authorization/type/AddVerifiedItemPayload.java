@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddVerifiedItemPayload {
-  private String service_name;
-  private String method_name;
+    private String service_name;
+    private String method_name;
 }

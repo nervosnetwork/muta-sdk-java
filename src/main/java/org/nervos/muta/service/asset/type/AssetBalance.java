@@ -10,6 +10,6 @@ import org.nervos.muta.client.type.primitive.U64;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AssetBalance {
-  private U64 value;
-  private Map<String, U64> allowance;
+    private U64 value;
+    private Map<String, U64> allowance;
 }

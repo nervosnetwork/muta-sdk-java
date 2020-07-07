@@ -23,8 +23,13 @@ test {
     useJUnitPlatform()
 }
 
-build.dependsOn(tasks.googleJavaFormat)
+compileJava.dependsOn(tasks.googleJavaFormat)
+compileTestJava.dependsOn(tasks.googleJavaFormat)
 verifyGoogleJavaFormat.mustRunAfter(tasks.googleJavaFormat)
+
+googleJavaFormat {
+    options style: 'AOSP'
+}
 
 dependencies {
     api "com.squareup.okhttp3:okhttp:4.7.2"

@@ -10,14 +10,15 @@ import org.nervos.muta.client.type.primitive.Metadata;
 @AllArgsConstructor
 @Getter
 public class MetadataService {
-  public static final String SERVICE_NAME = "metadata";
-  public static final String METHOD_GET_METADATA = "get_metadata";
-  private final Muta muta;
+    public static final String SERVICE_NAME = "metadata";
+    public static final String METHOD_GET_METADATA = "get_metadata";
+    private final Muta muta;
 
-  public Metadata getMetadata() throws IOException {
-    Metadata metadata =
-        muta.queryService(SERVICE_NAME, METHOD_GET_METADATA, new TypeReference<Metadata>() {});
+    public Metadata getMetadata() throws IOException {
+        Metadata metadata =
+                muta.queryService(
+                        SERVICE_NAME, METHOD_GET_METADATA, new TypeReference<Metadata>() {});
 
-    return metadata;
-  }
+        return metadata;
+    }
 }
