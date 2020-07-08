@@ -55,6 +55,10 @@ public class CryptoUtil {
         byte[] ret = new byte[32];
         byte[] input = bi.toByteArray();
 
+        if (input.length==0){
+            return ret;
+        }
+
         if (input[0] == 0x00) {
             input = Arrays.copyOfRange(input, 1, input.length);
         }
@@ -64,7 +68,7 @@ public class CryptoUtil {
                     "convertBigIntegerToBytes32, length is to long: " + bi.toString(16));
         }
 
-        System.arraycopy(input, 0, ret, 32 - input.length, 32);
+        System.arraycopy(input, 0, ret, 32 - input.length, input.length);
         return ret;
     }
 }
