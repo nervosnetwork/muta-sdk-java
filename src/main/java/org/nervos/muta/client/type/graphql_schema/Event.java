@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Event {
     private String service;
+    private String name;
     private String data;
 }
