@@ -55,7 +55,7 @@ public class CryptoUtil {
         byte[] ret = new byte[32];
         byte[] input = bi.toByteArray();
 
-        if (input.length==0){
+        if (input.length == 0) {
             return ret;
         }
 
