@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'org.nervos'
-version '1.0'
+version '1.1'
 
 
 repositories {
@@ -51,7 +51,7 @@ dependencies {
     testImplementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
-    //testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 
 }
 
@@ -67,7 +67,7 @@ bintray {
         vcsUrl = 'https://github.com/nervosnetwork/muta-sdk-java'
         desc = 'This is Muta-Chain JAVA SDK'
         version {
-            name = '1.0'
+            name = '1.1'
             desc = 'Muta Java SDK'
         }
     }
