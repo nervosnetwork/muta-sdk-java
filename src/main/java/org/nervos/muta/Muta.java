@@ -4,23 +4,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.function.Predicate;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.nervos.muta.client.Client;
 import org.nervos.muta.client.type.MutaRequestOption;
-import org.nervos.muta.client.type.graphql_schema.Block;
-import org.nervos.muta.client.type.graphql_schema.GAddress;
-import org.nervos.muta.client.type.graphql_schema.GBytes;
-import org.nervos.muta.client.type.graphql_schema.GHash;
-import org.nervos.muta.client.type.graphql_schema.GUint64;
-import org.nervos.muta.client.type.graphql_schema.InputRawTransaction;
-import org.nervos.muta.client.type.graphql_schema.InputTransactionEncryption;
-import org.nervos.muta.client.type.graphql_schema.Receipt;
-import org.nervos.muta.client.type.graphql_schema.ServiceResponse;
+import org.nervos.muta.client.type.graphql_schema.*;
 import org.nervos.muta.exception.GraphQlError;
 import org.nervos.muta.exception.ReceiptResponseError;
 import org.nervos.muta.exception.ServiceResponseError;
+import org.nervos.muta.exception.TxBeforeHookError;
 import org.nervos.muta.util.Util;
 import org.nervos.muta.wallet.Account;
 
@@ -31,6 +26,7 @@ public class Muta {
     private final Account account;
     private final MutaRequestOption mutaRequestOption;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    @Setter private Predicate<Muta> sendTxBeforeHook;
 
     public Muta(Client client, Account account, MutaRequestOption defaultReqOption) {
 
@@ -155,6 +151,12 @@ public class Muta {
             InputTransactionEncryption inputTransactionEncryption)
             throws IOException {
         checkClient();
+
+        // hook
+        if (sendTxBeforeHook != null && !sendTxBeforeHook.test(this)) {
+            throw new TxBeforeHookError("TxBeforeHook predicates fails");
+        }
+
         GHash ret = this.client.sendTransaction(inputRawTransaction, inputTransactionEncryption);
         return ret;
     }
