@@ -31,14 +31,19 @@ public class Account {
         this.point =
                 CryptoUtil.publicPoint(
                         new BigInteger(Arrays.concatenate(new byte[] {0x00}, privateKey)));
+
         byte[] compressed = this.point.getEncoded(true);
 
         if (compressed.length != 33) {
             throw new RuntimeException("publicKey should be 32 bytes, that's weird");
         }
         this.publicKey = compressed;
-        byte[] addr = Util.keccak256(compressed);
-        this.address = java.util.Arrays.copyOf(addr, 20);
+        byte[] pub = this.point.getEncoded(false);
+        pub = java.util.Arrays.copyOfRange(pub, 1, 65);
+
+        byte[] addr = Util.keccak256(pub);
+
+        this.address = java.util.Arrays.copyOfRange(addr, 12, 32);
     }
 
     public static Account fromHexString(String hexString) {

@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'org.nervos'
-version '1.0'
+version '1.1'
 
 
 repositories {
@@ -67,7 +67,7 @@ bintray {
         vcsUrl = 'https://github.com/nervosnetwork/muta-sdk-java'
         desc = 'This is Muta-Chain JAVA SDK'
         version {
-            name = '1.0'
+            name = '1.1'
             desc = 'Muta Java SDK'
         }
     }
