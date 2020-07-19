@@ -14,21 +14,36 @@ import org.nervos.muta.client.type.graphql_schema.ServiceResponse;
 import org.nervos.muta.client.type.request.*;
 import org.nervos.muta.exception.GraphQlError;
 
+/**
+ * Client plays role between remote GraphQl and local api. It handles all communications.
+ *
+ * @author Lycrus Hamster
+ */
 @Slf4j
 @Getter
 public class Client {
 
+    /** default content-typt */
     private static final MediaType APPLICATION_JSON =
             MediaType.get("application/json; charset=utf-8");
 
-    private final String url;
+    private static final String ZERO_UINT8 = "0x0000000000000000";
 
-    private final String ZERO_UINT8 = "0x0000000000000000";
+    /** remote GraphQl service url */
+    private final String url;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /** Muta sdk uses OkHttpClient to talk HTTP protocol with GraphQl server :) */
     private final OkHttpClient httpClient;
 
+    /**
+     * Construct only by url, with Muta's default OkHttpClient. If you want to custom your OWN
+     * OkHttpClient
+     *
+     * @see org.nervos.muta.client.Client#Client(String, OkHttpClient)
+     * @param url {@link org.nervos.muta.client.Client#url}
+     */
     public Client(String url) {
         this.url = url;
         this.httpClient =
@@ -38,22 +53,49 @@ public class Client {
                         .build();
     }
 
+    /**
+     * @param url {@link org.nervos.muta.client.Client#url}
+     * @param okHttpClient {@link org.nervos.muta.client.Client#httpClient}
+     */
     public Client(String url, OkHttpClient okHttpClient) {
         this.url = url;
         this.httpClient = okHttpClient;
     }
 
+    /**
+     * Create a Default Client to http://localhost:8000/graphql, That's the easiest way to talk to
+     * default Muta-Chain for test
+     *
+     * @return A pre-defined Client
+     */
     public static Client defaultClient() {
         return new Client("http://localhost:8000/graphql");
     }
 
+    /**
+     * Ask httpClient to send a http request containing GraphQl query/mutation payload
+     *
+     * @param payload HTTP request body
+     * @return HTTP response
+     * @throws IOException HTTP/network exceptions
+     */
     protected Response send(String payload) throws IOException {
         RequestBody body = RequestBody.create(payload, APPLICATION_JSON);
         Request request = new Request.Builder().url(url).post(body).build();
         return httpClient.newCall(request).execute();
     }
 
-    // parse a graphql result into class
+    /**
+     * Parse a graphql query/mutation result into class with given type param T
+     *
+     * @param response OkHttp's HTTP respone
+     * @param operation The name of GraphQl's operation, you could see GraphQl schema for more
+     *     details
+     * @param clazz To hold type param
+     * @param <T> To which type you want to convert
+     * @return Result of type T
+     * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
+     */
     protected <T> T parseGraphQlResponse(
             @NonNull Response response, String operation, Class<T> clazz) throws IOException {
         if (response.isSuccessful()) {
@@ -90,6 +132,13 @@ public class Client {
         }
     }
 
+    /**
+     * Start a GetBlock GraphQl query
+     *
+     * @param height The height want to query, <b>leave null for the latest</b>
+     * @return The block info
+     * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
+     */
     public Block getBlock(GUint64 height) throws IOException {
         MutaRequest mutaRequest =
                 new MutaRequest(
@@ -105,6 +154,13 @@ public class Client {
         return ret;
     }
 
+    /**
+     * Start a GetTransaction GraphQl query
+     *
+     * @param txHash The transaction hash of transaction you want to query
+     * @return The SignedTransaction when it sends
+     * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
+     */
     public SignedTransaction getTransaction(GHash txHash) throws IOException {
         MutaRequest mutaRequest =
                 new MutaRequest(
@@ -121,6 +177,13 @@ public class Client {
         return ret;
     }
 
+    /**
+     * Start a GetReceipt GraphQl query
+     *
+     * @param txHash The transaction hash of transaction you want to query
+     * @return The Receipt of the transaction's execution result
+     * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
+     */
     public Receipt getReceipt(GHash txHash) throws IOException {
         MutaRequest mutaRequest =
                 new MutaRequest(
@@ -136,6 +199,19 @@ public class Client {
         return ret;
     }
 
+    /**
+     * Start a QueryService GraphQl query, which do read operations on services
+     *
+     * @param serviceName the name of the service
+     * @param method the name of method under the service
+     * @param payload the input data of the method
+     * @param height on which height this queryService should run
+     * @param caller give a caller of this queryService
+     * @param cyclePrice a cyclePrice you want to use
+     * @param cycleLimit a cyclePrice you want to use
+     * @return The response of the execution of service
+     * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
+     */
     public ServiceResponse queryService(
             @NonNull String serviceName,
             @NonNull String method,
@@ -146,9 +222,8 @@ public class Client {
             GUint64 cycleLimit)
             throws IOException {
 
-        // graphql and json are happy with null
-        // however muta's queryservice api need String, not Option<String>,
-        // thus we must pass something like an empty string
+        // graphql and json are happy with "null"
+        // however muta's queryservice api use "" instead of "null"
         if (payload == "null") {
             payload = "";
         }
@@ -176,6 +251,14 @@ public class Client {
         return ret;
     }
 
+    /**
+     * Start a SendTransaction GraphQl query, which do write operations on services
+     *
+     * @param inputRaw The information of transaction of SendTransaction
+     * @param inputEncryption The signature of transaction of SendTransaction
+     * @return The transaction hash
+     * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
+     */
     public GHash sendTransaction(
             InputRawTransaction inputRaw, InputTransactionEncryption inputEncryption)
             throws IOException {

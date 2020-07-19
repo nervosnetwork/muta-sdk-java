@@ -4,6 +4,12 @@ import java.io.IOException;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+/**
+ * Simply indicate that a ServiceResponse's error, which means the 'code' field of a ServiceResponse
+ * is not zero
+ *
+ * @author Lycrus Hamster
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ServiceResponseError extends IOException {

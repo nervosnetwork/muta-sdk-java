@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.util.*;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import org.nervos.muta.client.Client;
@@ -16,6 +17,13 @@ import org.nervos.muta.client.type.request.GetReceiptRequest;
 import org.nervos.muta.client.type.request.GetTransactionRequest;
 import org.nervos.muta.exception.GraphQlError;
 
+/**
+ * A batch client for only GetBlock, GetReceipt and GetTransaction operations Note that GraphQl
+ * doesn't support batch mode and doesn't support this kind of 'batch' operation
+ *
+ * @author Lycrus Hamster
+ */
+@Slf4j
 public class BatchClient extends Client {
 
     public static String QUERY_NAME = "batch_query";

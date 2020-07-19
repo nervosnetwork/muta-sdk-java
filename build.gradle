@@ -17,6 +17,7 @@ repositories {
 
 java {
     withSourcesJar()
+    withJavadocJar()
 }
 
 test {
