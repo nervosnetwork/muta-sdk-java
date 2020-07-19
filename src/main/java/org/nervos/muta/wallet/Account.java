@@ -9,6 +9,12 @@ import org.nervos.muta.client.type.graphql_schema.GAddress;
 import org.nervos.muta.util.CryptoUtil;
 import org.nervos.muta.util.Util;
 
+/**
+ * Account is a class to hold all private key, public key and address info, and is on duty of sign
+ * tx
+ *
+ * @author Lycrus Hamster
+ */
 @Getter
 public class Account {
 

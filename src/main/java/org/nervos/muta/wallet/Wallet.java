@@ -9,6 +9,11 @@ import org.nervos.muta.util.Util;
 import org.web3j.crypto.Bip32ECKeyPair;
 import org.web3j.crypto.MnemonicUtils;
 
+/**
+ * Wallet handles mnemonic and derive job.
+ *
+ * @author Lycrus Hamster
+ */
 @Data
 @AllArgsConstructor
 public class Wallet {
