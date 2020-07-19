@@ -32,6 +32,13 @@ public class Wallet {
         return Wallet.from_mnemonic(words, "");
     }
 
+    /**
+     * Derive an account from the master node by give HD path
+     *
+     * @param coin_type the coin_type
+     * @param account_index account_index
+     * @return Account with the derived node
+     */
     public Account derive(int coin_type, int account_index) {
 
         Bip32ECKeyPair pair = Bip32ECKeyPair.generateKeyPair(this.seed);
