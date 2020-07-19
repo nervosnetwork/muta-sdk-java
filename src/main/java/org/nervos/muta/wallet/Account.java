@@ -52,19 +52,41 @@ public class Account {
         this.address = java.util.Arrays.copyOfRange(addr, 12, 32);
     }
 
+    /**
+     * Create account by private key in hex string format
+     *
+     * @param hexString private key in hex string
+     * @return created account
+     */
     public static Account fromHexString(String hexString) {
         Util.isValidHex(hexString);
         return new Account(Hex.decode(Util.remove0x(hexString)));
     }
 
+    /**
+     * Create account by private key in byte[] format
+     *
+     * @param b private key in byte[] format
+     * @return created account
+     */
     public static Account fromByteArray(byte[] b) {
         return new Account(b);
     }
 
+    /**
+     * Create account by a random private key
+     *
+     * @return created account
+     */
     public static Account generate() {
         return Account.fromHexString(Util.generateRandom32BytesHex());
     }
 
+    /**
+     * Return account with default private key, this is easy in dev and test env
+     *
+     * @return created account
+     */
     public static Account defaultAccount() {
         return Account.fromHexString(
                 "0x45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f");
@@ -102,6 +124,12 @@ public class Account {
         return Util.start0x(Hex.toHexString(address));
     }
 
+    /**
+     * Sign a data by this account's private key, the data should be a digest of certain message
+     *
+     * @param msgHash digest of message
+     * @return signed signature
+     */
     public byte[] sign(byte[] msgHash) {
         byte[] ret =
                 CryptoUtil.sign(
