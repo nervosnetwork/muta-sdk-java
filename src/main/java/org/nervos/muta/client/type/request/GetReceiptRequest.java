@@ -5,6 +5,12 @@ import lombok.Data;
 import org.nervos.muta.client.batch.BatchQuery;
 import org.nervos.muta.client.type.graphql_schema.GHash;
 
+/**
+ * A class to indicate a GetReceipt <b>query</b> in GraphQl. In addition, it contains the param of
+ * request
+ *
+ * @author Lycrus Hamster
+ */
 @Data
 @AllArgsConstructor
 public class GetReceiptRequest implements BatchQuery {
@@ -60,6 +66,7 @@ public class GetReceiptRequest implements BatchQuery {
     public static String batch_param_type = "Hash!";
     public static String batch_alias_prefix = "getReceipt_";
 
+    /** The height of querying block */
     private GHash txHash;
 
     @Override

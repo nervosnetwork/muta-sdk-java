@@ -5,10 +5,17 @@ import lombok.Data;
 import lombok.NonNull;
 import org.web3j.rlp.*;
 
+/** The signature of certain transaction */
 @Data
 public class InputTransactionEncryption {
+    /**
+     * Public key<b>s</b> of the signature. Note that Multi-Sig will use this field to contain one
+     * or one more public keys.
+     */
     @NonNull public GBytes pubkey;
+    /** Signature<b>s</b>. signatures should be as same sequence of public keys. */
     @NonNull public GBytes signature;
+    /** Which transaction this signature is related to. */
     @NonNull public GBytes txHash;
 
     public InputTransactionEncryption(GBytes pubkey, GBytes signature, GBytes txHash) {
@@ -22,6 +29,11 @@ public class InputTransactionEncryption {
         this.txHash = txHash;
     }
 
+    /**
+     * Combine this signature with another given signature. This is used in Multi-Sig mode.
+     *
+     * @param inputTransactionEncryption Another signature to be combined
+     */
     public void appendSignatureAndPubkey(InputTransactionEncryption inputTransactionEncryption) {
 
         RlpList pubkeys = RlpDecoder.decode(this.pubkey.get());
