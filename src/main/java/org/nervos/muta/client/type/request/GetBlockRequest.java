@@ -5,6 +5,12 @@ import lombok.Data;
 import org.nervos.muta.client.batch.BatchQuery;
 import org.nervos.muta.client.type.graphql_schema.GUint64;
 
+/**
+ * A class to indicate a GetBlock <b>query</b> in GraphQl. In addition, it contains the param of
+ * request
+ *
+ * @author Lycrus Hamster
+ */
 @AllArgsConstructor
 @Data
 public class GetBlockRequest implements BatchQuery {
@@ -82,6 +88,7 @@ public class GetBlockRequest implements BatchQuery {
     public static String batch_param_type = "Uint64";
     public static String batch_alias_prefix = "getBlock_";
 
+    /** The height of querying block */
     private GUint64 height;
 
     @Override

@@ -2,11 +2,9 @@ package org.nervos.muta.client.type.primitive;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -45,16 +43,6 @@ public class U8 {
     public static U8 fromHexString(String hexString) {
         Util.isValidHex(hexString);
         return new U8(new BigInteger(Util.remove0x(hexString), 16));
-    }
-
-    public static void main(String[] args) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        String se = objectMapper.writeValueAsString(U8.fromLong(1234));
-        System.out.println(se);
-
-        U8 de = objectMapper.readValue(se, U8.class);
-        System.out.println(de);
     }
 
     @Override

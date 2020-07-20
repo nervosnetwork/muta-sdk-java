@@ -40,6 +40,12 @@ public class BatchClient extends Client {
         return new BatchClient("http://localhost:8000/graphql");
     }
 
+    /**
+     * @param batchQueries The queries, you can give any requests which implement {@link
+     *     org.nervos.muta.client.batch.BatchQuery}
+     * @return The results of queries
+     * @throws IOException GraphQl exception or network exception
+     */
     public List<BatchQueryResponse> query(List<BatchQuery> batchQueries) throws IOException {
 
         List<String> query_params = new ArrayList<>(batchQueries.size());
@@ -88,6 +94,15 @@ public class BatchClient extends Client {
         return ret;
     }
 
+    /**
+     * Parse results of queries from GraphQl request
+     *
+     * @param response HTTP response
+     * @param batchQueries Queries sent, knowing the queries can imply the way how to parse the
+     *     result
+     * @return Parsed results
+     * @throws IOException GraphQl exception or network exception
+     */
     public List<BatchQueryResponse> parse_batch(
             @NonNull Response response, List<BatchQuery> batchQueries) throws IOException {
         if (response.isSuccessful()) {
@@ -111,6 +126,14 @@ public class BatchClient extends Client {
         }
     }
 
+    /**
+     * Handle the tedious work to unmarshall. Using instance operator should be faster than refect.
+     *
+     * @param dataRoot JSON node root
+     * @param batchQueries Queries to indicate what the related result format is
+     * @return Parsed results
+     * @throws IOException GraphQl exception or network exception
+     */
     public List<BatchQueryResponse> do_parse(JsonNode dataRoot, List<BatchQuery> batchQueries)
             throws IOException {
         List<BatchQueryResponse> ret = new ArrayList<>(batchQueries.size());

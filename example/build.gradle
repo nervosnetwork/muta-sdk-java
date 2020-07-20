@@ -1,0 +1,23 @@
+plugins {
+    id 'java-library'
+}
+
+group 'org.nervos'
+version '1.1'
+
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies{
+    api project(':')
+
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.12'
+
+    api group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    api group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    api group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
+}

@@ -1,15 +1,16 @@
 package org.nervos.muta.client.batch;
 
+/** This interface is a mark to justify which GraphQl queries are capable of batch */
 public interface BatchQuery {
-    public String getBatchQuery();
+    String getBatchQuery();
 
-    public String getBatchParamPrefix();
+    String getBatchParamPrefix();
 
-    public String getBatchParamType();
+    String getBatchParamType();
 
-    public String getBatchAliasPrefix();
+    String getBatchAliasPrefix();
 
-    public String getBatchQueryFragment();
+    String getBatchQueryFragment();
 
-    public Object getParamValue();
+    Object getParamValue();
 }
