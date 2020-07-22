@@ -6,8 +6,10 @@ plugins {
 }
 
 group 'org.nervos'
-version '1.0'
+version '1.0-jdk1.8'
 
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 repositories {
     mavenCentral()
@@ -67,7 +69,7 @@ bintray {
         vcsUrl = 'https://github.com/nervosnetwork/muta-sdk-java'
         desc = 'This is Muta-Chain JAVA SDK'
         version {
-            name = '1.0'
+            name = project.version
             desc = 'Muta Java SDK'
         }
     }
