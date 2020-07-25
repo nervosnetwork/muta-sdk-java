@@ -16,6 +16,7 @@ import org.nervos.muta.exception.GraphQlError;
 import org.nervos.muta.exception.ReceiptResponseError;
 import org.nervos.muta.exception.ServiceResponseError;
 import org.nervos.muta.exception.TxBeforeHookError;
+import org.nervos.muta.util.CryptoUtil;
 import org.nervos.muta.util.Util;
 import org.nervos.muta.wallet.Account;
 
@@ -531,5 +532,41 @@ public class Muta {
 
         T ret = objectMapper.readValue(succeedMsg, tr);
         return ret;
+    }
+
+    /**
+     * do ecdsa recovery of secp256k1
+     * @param signature the signature, combined with r and s, respective of 32 bytes
+     * @param msgHash the digest of message, which is 32 bytes, calc-ed by keccak256
+     * @param targetAddress which address you assume the signature is for
+     * @return match or not
+     */
+    public boolean ec_recover(
+            @NonNull byte[] signature, @NonNull byte[] msgHash, @NonNull byte[] targetAddress) {
+        if(msgHash.length!=32){
+            return false;
+        }
+        if(signature.length!=64){
+            return false;
+        }
+        return CryptoUtil.recovery(signature, msgHash, targetAddress);
+    }
+
+    /**
+     * do ecdsa verification of secp256k1
+     * @param signature the signature, combined with r and s, respective of 32 bytes
+     * @param msgHash the digest of message, which is 32 bytes, calc-ed by keccak256
+     * @param publicKey the public key which signs the signature
+     * @return match or not
+     */
+    public boolean ec_verify(
+            @NonNull byte[] signature, @NonNull byte[] msgHash, @NonNull byte[] publicKey) {
+        if(msgHash.length!=32){
+            return false;
+        }
+        if(signature.length!=64){
+            return false;
+        }
+        return CryptoUtil.verify(signature, msgHash, publicKey);
     }
 }

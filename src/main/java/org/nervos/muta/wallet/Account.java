@@ -44,12 +44,8 @@ public class Account {
             throw new RuntimeException("publicKey should be 32 bytes, that's weird");
         }
         this.publicKey = compressed;
-        byte[] pub = this.point.getEncoded(false);
-        pub = java.util.Arrays.copyOfRange(pub, 1, 65);
 
-        byte[] addr = Util.keccak256(pub);
-
-        this.address = java.util.Arrays.copyOfRange(addr, 12, 32);
+        this.address = CryptoUtil.getAddressFromPublicKey(this.point);
     }
 
     /**
