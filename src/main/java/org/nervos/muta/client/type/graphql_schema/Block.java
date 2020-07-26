@@ -19,7 +19,7 @@ public class Block implements BatchQueryResponse {
     /** block header, contains meta info of this block */
     private Header header;
     /** transactions included in block, sorted. */
-    private List<String> orderedTxHashes;
+    private List<GHash> orderedTxHashes;
     /** the hash of this block */
-    private String hash;
+    private GHash hash;
 }

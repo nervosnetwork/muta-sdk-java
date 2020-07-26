@@ -93,7 +93,7 @@ public class Client {
      *     details
      * @param clazz To hold type param
      * @param <T> To which type you want to convert
-     * @return Result of type T
+     * @return Result of type T, note this may be null
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
     protected <T> T parseGraphQlResponse(
@@ -136,7 +136,7 @@ public class Client {
      * Start a GetBlock GraphQl query
      *
      * @param height The height want to query, <b>leave null for the latest</b>
-     * @return The block info
+     * @return The block info, note the block could be null
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
     public Block getBlock(GUint64 height) throws IOException {
@@ -158,7 +158,7 @@ public class Client {
      * Start a GetTransaction GraphQl query
      *
      * @param txHash The transaction hash of transaction you want to query
-     * @return The SignedTransaction when it sends
+     * @return The SignedTransaction when it sends, maybe null
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
     public SignedTransaction getTransaction(GHash txHash) throws IOException {
@@ -181,7 +181,7 @@ public class Client {
      * Start a GetReceipt GraphQl query
      *
      * @param txHash The transaction hash of transaction you want to query
-     * @return The Receipt of the transaction's execution result
+     * @return The Receipt of the transaction's execution result, maybe null
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
     public Receipt getReceipt(GHash txHash) throws IOException {
@@ -224,7 +224,7 @@ public class Client {
 
         // graphql and json are happy with "null"
         // however muta's queryservice api use "" instead of "null"
-        if (payload == "null") {
+        if (payload.equals("null")) {
             payload = "";
         }
 

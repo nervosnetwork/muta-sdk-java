@@ -2,7 +2,11 @@ package org.nervos.muta.test.wallet;
 
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.nervos.muta.util.CryptoUtil;
+import org.nervos.muta.util.Util;
 import org.nervos.muta.wallet.Account;
 
 public class AccountTest {
@@ -13,7 +17,7 @@ public class AccountTest {
                 Account.fromHexString(
                         "0x45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f");
 
-        Assertions.assertEquals("0xf8389d774afdad8755ef8e629e5a154fddc6325a", acc.getAddressHex());
+        Assertions.assertEquals("0x8ed9a61dc092aaa7d7fd98ef710c9a0ce0e9cf08", acc.getAddressHex());
         Assertions.assertEquals(
                 "0x45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f",
                 acc.getPrivateKeyHex());
@@ -43,5 +47,53 @@ public class AccountTest {
         Assertions.assertEquals(
                 "09e9524859d589bff664a0c2284448229f156b946f8487f65c9f3476a6a0ed226b32326bb9bbbc181bbbf2ab90100634ddb5ba0553d340e0e9226a5fef301c43",
                 Hex.toHexString(sig));
+    }
+
+    @Test
+    void testVerify() {
+        Account acc =
+                Account.fromHexString(
+                        "0x45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f");
+        byte[] sig =
+                acc.sign(
+                        Hex.decode(
+                                "0000000000000000000000000000000000000000000000000000000000000000"));
+
+        Assertions.assertTrue(
+                CryptoUtil.verify(
+                        sig,
+                        Hex.decode(
+                                "0000000000000000000000000000000000000000000000000000000000000000"),
+                        acc.getPublicKey()));
+    }
+
+    @Test
+    void testRecovery() {
+        Account acc =
+                Account.fromHexString(
+                        "0x45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f");
+        byte[] sig =
+                acc.sign(
+                        Hex.decode(
+                                "0000000000000000000000000000000000000000000000000000000000000000"));
+        Assertions.assertTrue(
+                CryptoUtil.recovery(
+                        sig,
+                        Hex.decode(
+                                "0000000000000000000000000000000000000000000000000000000000000000"),
+                        acc.getAddressByteArray()));
+    }
+
+    @Test
+    void testRandom() {
+        int loop = 64;
+        while (loop > 0) {
+            loop--;
+            Account acc = Account.generate();
+            byte[] msgHash = Util.generateRandom32Bytes();
+            byte[] sig = acc.sign(msgHash);
+            Assertions.assertTrue(CryptoUtil.recovery(sig, msgHash, acc.getAddressByteArray()));
+            Assertions.assertTrue(CryptoUtil.verify(sig, msgHash, acc.getPublicKey()));
+        }
     }
 }

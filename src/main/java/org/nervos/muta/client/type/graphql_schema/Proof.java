@@ -13,13 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Proof {
     /** work together with the list of authenticators, to indicate who give their signatures */
-    public String bitmap;
+    public GBytes bitmap;
     /** which block this proof belongs to */
-    public String blockHash;
+    public GHash blockHash;
     /** which height of block this proof belongs to */
-    public String height;
+    public GUint64 height;
     /** which round of consensus this proof generate on */
-    public String round;
+    public GUint64 round;
     /** aggregate signature */
-    public String signature;
+    public GBytes signature;
 }

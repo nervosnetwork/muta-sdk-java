@@ -9,16 +9,16 @@ import org.nervos.muta.client.batch.BatchQueryResponse;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SignedTransaction implements BatchQueryResponse {
-    private String chainId;
-    private String cyclesLimit;
-    private String cyclesPrice;
-    private String nonce;
-    private String timeout;
+    private GHash chainId;
+    private GUint64 cyclesLimit;
+    private GUint64 cyclesPrice;
+    private GHash nonce;
+    private GUint64 timeout;
+    private GAddress sender;
     private String serviceName;
     private String method;
     private String payload;
-    private String txHash;
-    private String pubkey;
-    private String signature;
-    private String sender;
+    private GHash txHash;
+    private GBytes pubkey;
+    private GBytes signature;
 }
