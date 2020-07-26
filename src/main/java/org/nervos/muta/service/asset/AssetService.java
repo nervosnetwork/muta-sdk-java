@@ -5,6 +5,7 @@ import java.io.IOException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.nervos.muta.Muta;
+import org.nervos.muta.client.type.primitive.U64;
 import org.nervos.muta.service.asset.type.*;
 
 @AllArgsConstructor
@@ -78,5 +79,13 @@ public class AssetService {
                 METHOD_TRANSFER_FROM,
                 transferFromPayload,
                 new TypeReference<Void>() {});
+    }
+
+    public static void main(String[] args) throws IOException {
+
+        Muta muta = Muta.defaultMuta();
+
+        AssetService assetService = new AssetService(muta);
+        assetService.createAsset(new CreateAssetPayload("HAM", "HAM", U64.fromLong(1234)));
     }
 }

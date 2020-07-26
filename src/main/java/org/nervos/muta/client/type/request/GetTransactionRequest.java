@@ -1,5 +1,6 @@
 package org.nervos.muta.client.type.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.nervos.muta.client.batch.BatchQuery;
@@ -60,31 +61,37 @@ public class GetTransactionRequest implements BatchQuery {
     /** The height of querying block */
     private GHash txHash;
 
+    @JsonIgnore
     @Override
     public String getBatchQuery() {
         return batch_query;
     }
 
+    @JsonIgnore
     @Override
     public String getBatchParamPrefix() {
         return batch_param_prefix;
     }
 
+    @JsonIgnore
     @Override
     public String getBatchParamType() {
         return batch_param_type;
     }
 
+    @JsonIgnore
     @Override
     public String getBatchAliasPrefix() {
         return batch_alias_prefix;
     }
 
+    @JsonIgnore
     @Override
     public String getBatchQueryFragment() {
         return batch_query_fragment;
     }
 
+    @JsonIgnore
     @Override
     public Object getParamValue() {
         return this.getTxHash();

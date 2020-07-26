@@ -11,10 +11,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.nervos.muta.client.Client;
 import org.nervos.muta.client.type.MutaRequestOption;
+import org.nervos.muta.client.type.ParsedServiceResponse;
 import org.nervos.muta.client.type.graphql_schema.*;
 import org.nervos.muta.exception.GraphQlError;
-import org.nervos.muta.exception.ReceiptResponseError;
-import org.nervos.muta.exception.ServiceResponseError;
 import org.nervos.muta.exception.TxBeforeHookError;
 import org.nervos.muta.util.CryptoUtil;
 import org.nervos.muta.util.Util;
@@ -59,7 +58,7 @@ public class Muta {
 
         if (account == null) {
             account = Account.defaultAccount();
-            log.warn("you are using default account: " + account.getAddressByteArray());
+            log.warn("you are using default account: " + account.getAddressHex());
         }
 
         if (defaultReqOption == null) {
@@ -85,7 +84,40 @@ public class Muta {
     public BigInteger getLatestHeight() throws IOException {
         checkClient();
         Block block = client.getBlock(null);
-        return new BigInteger(Util.remove0x(block.getHeader().getHeight()), 16);
+        return block.getHeader().getHeight().get();
+    }
+
+    /**
+     * Start a GetBlock GraphQl query
+     *
+     * @param height The height want to query, <b>leave null for the latest</b>
+     * @return The block info, note the block could be null
+     * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
+     */
+    public Block getBlock(GUint64 height) throws IOException {
+        return client.getBlock(height);
+    }
+
+    /**
+     * Start a GetReceipt GraphQl query
+     *
+     * @param txHash The transaction hash of transaction you want to query
+     * @return The Receipt of the transaction's execution result, maybe null
+     * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
+     */
+    public Receipt getReceipt(GHash txHash) throws IOException {
+        return client.getReceipt(txHash);
+    }
+
+    /**
+     * Start a GetTransaction GraphQl query
+     *
+     * @param txHash The transaction hash of transaction you want to query
+     * @return The SignedTransaction when it sends, maybe null
+     * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
+     */
+    public SignedTransaction getTransaction(GHash txHash) throws IOException {
+        return client.getTransaction(txHash);
     }
 
     /**
@@ -141,7 +173,7 @@ public class Muta {
      * @param caller in the name of caller this queryService should run
      * @param cyclePrice give a specified cyclePrice
      * @param cycleLimit give a specified cycleLimit
-     * @return unmarshalled object of type T
+     * @return unmarshalled object of type T, or null for error in ServiceResponse
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
     public <T> T queryService(
@@ -162,7 +194,8 @@ public class Muta {
         ServiceResponse serviceResponse =
                 client.queryService(
                         serviceName, method, payload, height, caller, cyclePrice, cycleLimit);
-        T ret = parseServiceResponse(serviceResponse, tr);
+        ParsedServiceResponse<T> parsedServiceResponse = parseServiceResponse(serviceResponse, tr);
+        T ret = parsedServiceResponse.isError() ? null : parsedServiceResponse.getSucceedData();
         return ret;
     }
 
@@ -269,7 +302,7 @@ public class Muta {
      * @param tr Type reference to hold type param
      * @param <P> The generic of payload, should be friendly with Jackson
      * @param <R> The generic of return data, should be friendly with Jackson
-     * @return The unmarshalled java object
+     * @return The unmarshalled java object, or null for error returned in ServiceResponse
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
     public <P, R> R sendTransactionAndPollResult(
@@ -280,7 +313,8 @@ public class Muta {
         GHash txHash =
                 this.sendTransaction(null, null, null, null, null, serviceName, method, payload);
         log.debug("send txhash: " + txHash);
-        return getReceiptSucceedDataRetry(txHash, tr);
+        ParsedServiceResponse<R> parsedServiceResponse = getReceiptSucceedDataRetry(txHash, tr);
+        return parsedServiceResponse.isError() ? null : parsedServiceResponse.getSucceedData();
     }
 
     /**
@@ -289,16 +323,19 @@ public class Muta {
      * @param txHash the transaction hash you want to poll
      * @param tr Type reference to hold type param
      * @param <P> The generic of return data
-     * @return The java object to be unmarshalled by Jackson
+     * @return The java object or error
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
-    public <P> P getReceiptSucceedDataRetry(GHash txHash, TypeReference<P> tr) throws IOException {
+    public <P> ParsedServiceResponse<P> getReceiptSucceedDataRetry(
+            GHash txHash, TypeReference<P> tr) throws IOException {
         int times = this.mutaRequestOption.getPolling_times();
         Exception lastErr = null;
         while (times > 0) {
             try {
-                P ret = getReceiptSucceedData(txHash, tr);
-                return ret;
+                ParsedServiceResponse<P> ret = getReceiptSucceedData(txHash, tr);
+                if (ret != null) {
+                    return ret;
+                }
             } catch (GraphQlError e) {
                 lastErr = e;
                 log.debug("getReceiptSucceedDataRetry: " + e.getMessage());
@@ -326,41 +363,28 @@ public class Muta {
 
     /**
      * Unmarshall the JSON string according to the given type param. While receipt is ready but the
-     * service response is error, thrown {@link org.nervos.muta.exception.ReceiptResponseError}
      *
      * @param txHash The transaction hash
      * @param tr Type reference to hold type param
      * @param <R> The generic of the return data to be unmarshalled
-     * @return The unmarshalled java object.
+     * @return Return null for receipt is null(maybe not ready), return ParsedServiceResponse if get
+     *     receipt
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
-    public <R> R getReceiptSucceedData(GHash txHash, TypeReference<R> tr) throws IOException {
+    public <R> ParsedServiceResponse<R> getReceiptSucceedData(
+            GHash txHash, TypeReference<R> tr /*add event here*/) throws IOException {
         checkClient();
 
         Receipt receipt = client.getReceipt(txHash);
 
-        if (!BigInteger.ZERO.equals(
-                new BigInteger(Util.remove0x(receipt.getResponse().getResponse().getCode()), 16))) {
-            log.debug("getReceiptSucceedData error: " + objectMapper.writeValueAsString(receipt));
-            throw new ReceiptResponseError(
-                    receipt.getResponse().getServiceName(),
-                    receipt.getResponse().getMethod(),
-                    receipt.getResponse().getResponse().getCode(),
-                    receipt.getResponse().getResponse().getErrorMessage());
+        if (receipt == null) {
+            return null;
         }
 
-        try {
-            R ret = parseServiceResponse(receipt.getResponse().getResponse(), tr);
-            return ret;
-        } catch (ServiceResponseError e) {
-            throw new ReceiptResponseError(
-                    receipt.getResponse().getServiceName(),
-                    receipt.getResponse().getMethod(),
-                    receipt.getResponse().getResponse().getCode(),
-                    receipt.getResponse().getResponse().getErrorMessage());
-        } catch (IOException e) {
-            throw e;
-        }
+        ParsedServiceResponse<R> ret =
+                parseServiceResponse(receipt.getResponse().getResponse(), tr);
+
+        return ret;
     }
 
     /**
@@ -516,26 +540,15 @@ public class Muta {
      * @return Unmarshalled java object
      * @throws IOException JSON unmarshall error or service response error
      */
-    protected <T> T parseServiceResponse(ServiceResponse serviceResponse, TypeReference<T> tr)
-            throws IOException {
-        if (!new BigInteger(Util.remove0x(serviceResponse.getCode())).equals(BigInteger.ZERO)) {
-            throw new ServiceResponseError(
-                    serviceResponse.getCode(), serviceResponse.getErrorMessage());
-        }
+    protected <T> ParsedServiceResponse<T> parseServiceResponse(
+            ServiceResponse serviceResponse, TypeReference<T> tr) throws IOException {
 
-        String succeedMsg = serviceResponse.getSucceedData();
-
-        // it's weird design for muta
-        if ("".equals(succeedMsg)) {
-            succeedMsg = "null";
-        }
-
-        T ret = objectMapper.readValue(succeedMsg, tr);
-        return ret;
+        return ParsedServiceResponse.fromServiceResponse(serviceResponse, tr);
     }
 
     /**
      * do ecdsa recovery of secp256k1
+     *
      * @param signature the signature, combined with r and s, respective of 32 bytes
      * @param msgHash the digest of message, which is 32 bytes, calc-ed by keccak256
      * @param targetAddress which address you assume the signature is for
@@ -543,10 +556,10 @@ public class Muta {
      */
     public boolean ec_recover(
             @NonNull byte[] signature, @NonNull byte[] msgHash, @NonNull byte[] targetAddress) {
-        if(msgHash.length!=32){
+        if (msgHash.length != 32) {
             return false;
         }
-        if(signature.length!=64){
+        if (signature.length != 64) {
             return false;
         }
         return CryptoUtil.recovery(signature, msgHash, targetAddress);
@@ -554,6 +567,7 @@ public class Muta {
 
     /**
      * do ecdsa verification of secp256k1
+     *
      * @param signature the signature, combined with r and s, respective of 32 bytes
      * @param msgHash the digest of message, which is 32 bytes, calc-ed by keccak256
      * @param publicKey the public key which signs the signature
@@ -561,10 +575,10 @@ public class Muta {
      */
     public boolean ec_verify(
             @NonNull byte[] signature, @NonNull byte[] msgHash, @NonNull byte[] publicKey) {
-        if(msgHash.length!=32){
+        if (msgHash.length != 32) {
             return false;
         }
-        if(signature.length!=64){
+        if (signature.length != 64) {
             return false;
         }
         return CryptoUtil.verify(signature, msgHash, publicKey);

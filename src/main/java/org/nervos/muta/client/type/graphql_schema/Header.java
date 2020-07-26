@@ -9,18 +9,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Header {
-    private String chainId;
-    private List<String> confirmRoot;
-    private List<String> cyclesUsed;
-    private String height;
-    private String execHeight;
-    private String orderRoot;
-    private String prevHash;
-    private String proposer;
-    private List<String> receiptRoot;
-    private String stateRoot;
-    private String timestamp;
-    private String validatorVersion;
+    private GHash chainId;
+    private List<GHash> confirmRoot;
+    private List<GUint64> cyclesUsed;
+    private GUint64 height;
+    private GUint64 execHeight;
+    private GHash orderRoot;
+    private GHash prevHash;
+    private GAddress proposer;
+    private List<GHash> receiptRoot;
+    private GHash stateRoot;
+    private GUint64 timestamp;
+    private GUint64 validatorVersion;
     private Proof proof;
     private List<Validator> validators;
 }

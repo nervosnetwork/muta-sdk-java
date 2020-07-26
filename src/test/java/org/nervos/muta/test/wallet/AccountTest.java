@@ -2,7 +2,9 @@ package org.nervos.muta.test.wallet;
 
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.nervos.muta.util.CryptoUtil;
 import org.nervos.muta.util.Util;
 import org.nervos.muta.wallet.Account;

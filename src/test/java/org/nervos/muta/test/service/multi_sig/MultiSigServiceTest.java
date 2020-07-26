@@ -132,7 +132,8 @@ public class MultiSigServiceTest {
 
         Asset asset =
                 account1.getMuta()
-                        .getReceiptSucceedDataRetry(txHash, new TypeReference<Asset>() {});
+                        .getReceiptSucceedDataRetry(txHash, new TypeReference<Asset>() {})
+                        .getSucceedData();
         Assertions.assertEquals(multi_sig_account, asset.getIssuer().toGAdress());
     }
 }
