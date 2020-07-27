@@ -47,7 +47,7 @@ public class MultiSigServiceTest {
                                 Account.fromHexString(
                                         "0x0000000000000000000000000000000000000000000000000000000000000001"),
                                 null));
-        account1addr = account1.getMuta().getAccount().getAddress();
+        account1addr = account1.getMuta().getAccount().getGAddress();
         log.debug(account1addr.toString());
 
         account2 =
@@ -57,7 +57,7 @@ public class MultiSigServiceTest {
                                 Account.fromHexString(
                                         "0x0000000000000000000000000000000000000000000000000000000000000002"),
                                 null));
-        account2addr = account2.getMuta().getAccount().getAddress();
+        account2addr = account2.getMuta().getAccount().getGAddress();
         log.debug(account2addr.toString());
 
         account3 =
@@ -67,7 +67,7 @@ public class MultiSigServiceTest {
                                 Account.fromHexString(
                                         "0x0000000000000000000000000000000000000000000000000000000000000003"),
                                 null));
-        account3addr = account3.getMuta().getAccount().getAddress();
+        account3addr = account3.getMuta().getAccount().getGAddress();
         log.debug(account3addr.toString());
     }
 

@@ -2,9 +2,7 @@ package org.nervos.muta.test.wallet;
 
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.nervos.muta.util.CryptoUtil;
 import org.nervos.muta.util.Util;
 import org.nervos.muta.wallet.Account;
@@ -18,6 +16,8 @@ public class AccountTest {
                         "0x45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f");
 
         Assertions.assertEquals("0x8ed9a61dc092aaa7d7fd98ef710c9a0ce0e9cf08", acc.getAddressHex());
+        Assertions.assertEquals(
+                "muta13mv6v8wqj24204lanrhhzry6pnswnncga5c8cl", acc.getBech32Address());
         Assertions.assertEquals(
                 "0x45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f",
                 acc.getPrivateKeyHex());

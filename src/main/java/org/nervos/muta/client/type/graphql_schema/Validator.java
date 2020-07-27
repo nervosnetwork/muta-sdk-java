@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Validator {
-    public GAddress address;
+    public GBytes pubkey;
     public int proposeWeight;
     public int voteWeight;
 }

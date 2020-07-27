@@ -3,7 +3,6 @@ package org.nervos.muta.test.client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
 import java.math.BigInteger;
-
 import org.junit.jupiter.api.*;
 import org.nervos.muta.Muta;
 import org.nervos.muta.client.Client;

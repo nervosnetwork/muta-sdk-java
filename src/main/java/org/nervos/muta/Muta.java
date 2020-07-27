@@ -457,7 +457,7 @@ public class Muta {
         }
 
         if (sender == null) {
-            sender = account.getAddress();
+            sender = account.getGAddress();
         }
 
         InputRawTransaction inputRawTransaction =

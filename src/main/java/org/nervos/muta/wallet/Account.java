@@ -6,6 +6,8 @@ import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.nervos.muta.client.type.graphql_schema.GAddress;
+import org.nervos.muta.client.type.primitive.Address;
+import org.nervos.muta.util.Bech32Util;
 import org.nervos.muta.util.CryptoUtil;
 import org.nervos.muta.util.Util;
 
@@ -24,6 +26,8 @@ public class Account {
     private final byte[] publicKey;
     // 20bytes,keccak(hash)[0..20]
     private final byte[] address;
+
+    private final String bech32Address;
 
     private final ECPoint point;
 
@@ -46,6 +50,8 @@ public class Account {
         this.publicKey = compressed;
 
         this.address = CryptoUtil.getAddressFromPublicKey(this.point);
+
+        this.bech32Address = Bech32Util.encodeAddress(address);
     }
 
     /**
@@ -85,7 +91,7 @@ public class Account {
      */
     public static Account defaultAccount() {
         return Account.fromHexString(
-                "0x45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f");
+                "0xe05d9e08a18cf5573a92d030342c3b45395cd952e02346ba78e16421ee9dad88");
     }
 
     public byte[] getPrivateKeyByteArray() {
@@ -112,8 +118,12 @@ public class Account {
         return address;
     }
 
-    public GAddress getAddress() {
+    public GAddress getGAddress() {
         return GAddress.fromByteArray(address);
+    }
+
+    public Address getAddress() {
+        return Address.fromByteArray(address);
     }
 
     public String getAddressHex() {

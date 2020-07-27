@@ -15,6 +15,7 @@ import java.io.IOException;
 import lombok.EqualsAndHashCode;
 import org.bouncycastle.util.encoders.Hex;
 import org.nervos.muta.client.type.primitive.Address;
+import org.nervos.muta.util.Bech32Util;
 import org.nervos.muta.util.Util;
 
 @EqualsAndHashCode
@@ -22,13 +23,15 @@ import org.nervos.muta.util.Util;
 @JsonSerialize(using = GAddress.GAddressSerializer.class)
 public class GAddress {
     public static int LENGTH = 20;
-    private byte[] b;
+    private final byte[] b;
+    private final String bech32str;
 
     private GAddress(byte[] b) {
         if (is_invalid(b)) {
             throw new RuntimeException("GAddress construction fails, input bytes[] != 20");
         }
         this.b = b;
+        this.bech32str = Bech32Util.encodeAddress(b);
     }
 
     public static boolean is_invalid(byte[] b) {
@@ -43,6 +46,11 @@ public class GAddress {
         Util.isValidHex(hexString);
         byte[] b = Hex.decode(Util.remove0x(hexString));
         return new GAddress(b);
+    }
+
+    public static GAddress fromBech32(String bech32String) {
+        byte[] address = Bech32Util.decodeAddress(bech32String);
+        return fromByteArray(address);
     }
 
     public byte[] get() {
@@ -66,7 +74,7 @@ public class GAddress {
         @Override
         public void serialize(GAddress value, JsonGenerator gen, SerializerProvider provider)
                 throws IOException {
-            gen.writeString(Util.start0x(Hex.toHexString(value.b)));
+            gen.writeString(value.bech32str);
         }
     }
 
@@ -84,9 +92,9 @@ public class GAddress {
                 throws IOException, JsonProcessingException {
             ObjectCodec oc = jsonParser.getCodec();
             JsonNode root = oc.readTree(jsonParser);
-            String hex = root.asText();
+            String bech32String = root.asText();
 
-            return GAddress.fromHexString(hex);
+            return GAddress.fromBech32(bech32String);
         }
     }
 
