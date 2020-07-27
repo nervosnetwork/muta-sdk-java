@@ -46,7 +46,7 @@ public class ClientTest {
                         AssetService.METHOD_CREATE_ASSET,
                         new CreateAssetPayload("Squirrel", "SQU", U64.fromLong(1314)));
 
-        muta.getReceiptSucceedDataRetry(gHash, new TypeReference<Asset>() {});
+        muta.getReceiptSucceedDataRetry(gHash, new TypeReference<Asset>() {}, null);
     }
 
     @Test

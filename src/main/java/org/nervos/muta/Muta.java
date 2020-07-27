@@ -1,16 +1,18 @@
 package org.nervos.muta;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.*;
 import java.util.function.Predicate;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import java.util.stream.Collectors;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.nervos.muta.client.Client;
 import org.nervos.muta.client.type.MutaRequestOption;
+import org.nervos.muta.client.type.ParsedEvent;
 import org.nervos.muta.client.type.ParsedServiceResponse;
 import org.nervos.muta.client.type.graphql_schema.*;
 import org.nervos.muta.exception.GraphQlError;
@@ -43,6 +45,8 @@ public class Muta {
      */
     @Setter private Predicate<Muta> sendTxBeforeHook;
 
+    @Setter private Map<RegistryEntry, TypeReference<?>> eventRegistry = new HashMap<>();
+
     /**
      * Constructor with all params you can customize
      *
@@ -68,6 +72,15 @@ public class Muta {
         this.mutaRequestOption = defaultReqOption;
         this.account = account;
         this.client = client;
+    }
+
+    public Muta(
+            Client client,
+            Account account,
+            MutaRequestOption defaultReqOption,
+            List<EventRegisterEntry<?>> eventRegisterEntries) {
+        this(client, account, defaultReqOption);
+        this.register(eventRegisterEntries);
     }
 
     /** @return {@link org.nervos.muta.Muta} */
@@ -302,19 +315,46 @@ public class Muta {
      * @param tr Type reference to hold type param
      * @param <P> The generic of payload, should be friendly with Jackson
      * @param <R> The generic of return data, should be friendly with Jackson
+     * @param events List to contain parsed event
      * @return The unmarshalled java object, or null for error returned in ServiceResponse
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
     public <P, R> R sendTransactionAndPollResult(
-            @NonNull String serviceName, @NonNull String method, P payloadData, TypeReference<R> tr)
+            @NonNull String serviceName,
+            @NonNull String method,
+            P payloadData,
+            TypeReference<R> tr,
+            @NonNull List<ParsedEvent<?>> events)
             throws IOException {
         String payload = this.objectMapper.writeValueAsString(payloadData);
 
         GHash txHash =
                 this.sendTransaction(null, null, null, null, null, serviceName, method, payload);
         log.debug("send txhash: " + txHash);
-        ParsedServiceResponse<R> parsedServiceResponse = getReceiptSucceedDataRetry(txHash, tr);
+        ParsedServiceResponse<R> parsedServiceResponse =
+                getReceiptSucceedDataRetry(txHash, tr, events);
         return parsedServiceResponse.isError() ? null : parsedServiceResponse.getSucceedData();
+    }
+
+    /**
+     * Send a transaction with commonly used param and poll the result of the execution, a.k.a.
+     * receipt. And then poll the receipt to get the receipt and then return it.
+     *
+     * @param serviceName the name of the service
+     * @param method the method of the service
+     * @param payloadData the payload used in the method, will be marshalled by Jackson to JSON
+     *     string,
+     * @param tr Type reference to hold type param
+     * @param <P> The generic of payload, should be friendly with Jackson
+     * @param <R> The generic of return data, should be friendly with Jackson
+     * @return The unmarshalled java object, or null for error returned in ServiceResponse
+     * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
+     */
+    public <P, R> R sendTransactionAndPollResult(
+            @NonNull String serviceName, @NonNull String method, P payloadData, TypeReference<R> tr)
+            throws IOException {
+        return sendTransactionAndPollResult(
+                serviceName, method, payloadData, tr, new ArrayList<>());
     }
 
     /**
@@ -327,12 +367,13 @@ public class Muta {
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
     public <P> ParsedServiceResponse<P> getReceiptSucceedDataRetry(
-            GHash txHash, TypeReference<P> tr) throws IOException {
+            GHash txHash, TypeReference<P> tr, @NonNull List<ParsedEvent<?>> events)
+            throws IOException {
         int times = this.mutaRequestOption.getPolling_times();
         Exception lastErr = null;
         while (times > 0) {
             try {
-                ParsedServiceResponse<P> ret = getReceiptSucceedData(txHash, tr);
+                ParsedServiceResponse<P> ret = getReceiptSucceedData(txHash, tr, events);
                 if (ret != null) {
                     return ret;
                 }
@@ -372,7 +413,8 @@ public class Muta {
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
     public <R> ParsedServiceResponse<R> getReceiptSucceedData(
-            GHash txHash, TypeReference<R> tr /*add event here*/) throws IOException {
+            GHash txHash, TypeReference<R> tr, @NonNull List<ParsedEvent<?>> events)
+            throws IOException {
         checkClient();
 
         Receipt receipt = client.getReceipt(txHash);
@@ -383,6 +425,28 @@ public class Muta {
 
         ParsedServiceResponse<R> ret =
                 parseServiceResponse(receipt.getResponse().getResponse(), tr);
+
+        events.addAll(
+                receipt.getEvents().stream()
+                        .map(
+                                event -> {
+                                    TypeReference<?> type =
+                                            this.eventRegistry.get(
+                                                    new RegistryEntry(
+                                                            event.getService(), event.getName()));
+                                    if (type == null) {
+                                        return null;
+                                    }
+                                    ParsedEvent<?> e = null;
+                                    try {
+                                        e = ParsedEvent.fromEvent(event, type);
+                                    } catch (JsonProcessingException jsonProcessingException) {
+                                        log.error(jsonProcessingException.toString());
+                                    }
+                                    return e;
+                                })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
 
         return ret;
     }
@@ -582,5 +646,24 @@ public class Muta {
             return false;
         }
         return CryptoUtil.verify(signature, msgHash, publicKey);
+    }
+
+    public void register(List<EventRegisterEntry<?>> eventRegisterEntries) {
+
+        eventRegisterEntries.forEach(
+                eventRegisterEntry -> {
+                    this.eventRegistry.putIfAbsent(
+                            new RegistryEntry(
+                                    eventRegisterEntry.getService(), eventRegisterEntry.getName()),
+                            eventRegisterEntry.getDataType());
+                });
+    }
+
+    @Data
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    private static class RegistryEntry {
+        private String service;
+        private String name;
     }
 }
