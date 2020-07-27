@@ -137,6 +137,13 @@ public class CryptoUtil {
         return false;
     }
 
+    public static ECPoint getECPointFromCompressedPublicKeyFormat(byte[] compEnc) {
+        if (compEnc.length == 33 && (compEnc[0] == 0x02 || compEnc[0] == 0x03)) {
+            return CURVE.getCurve().decodePoint(compEnc);
+        }
+        return null;
+    }
+
     public static byte[] getAddressFromPublicKey(@NonNull ECPoint point) {
         byte[] pub = point.getEncoded(false);
         pub = java.util.Arrays.copyOfRange(pub, 1, 65);

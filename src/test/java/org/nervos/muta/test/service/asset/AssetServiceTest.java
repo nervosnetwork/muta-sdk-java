@@ -40,8 +40,8 @@ public class AssetServiceTest {
         backupAssetService =
                 new AssetService(new Muta(Client.defaultClient(), Account.generate(), null));
 
-        issuer = assetService.getMuta().getAccount().getAddress();
-        another_account_address = backupAssetService.getMuta().getAccount().getAddress();
+        issuer = assetService.getMuta().getAccount().getGAddress();
+        another_account_address = backupAssetService.getMuta().getAccount().getGAddress();
     }
 
     @Test
@@ -101,7 +101,7 @@ public class AssetServiceTest {
     @Test
     @Order(5)
     public void approve() throws IOException {
-        GAddress another_account_address = backupAssetService.getMuta().getAccount().getAddress();
+        GAddress another_account_address = backupAssetService.getMuta().getAccount().getGAddress();
 
         assetService.approve(
                 new TransferPayload(
