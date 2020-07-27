@@ -2,11 +2,14 @@ package org.nervos.muta.test.service.asset;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.nervos.muta.Muta;
 import org.nervos.muta.client.Client;
+import org.nervos.muta.client.type.ParsedEvent;
 import org.nervos.muta.client.type.graphql_schema.GAddress;
 import org.nervos.muta.client.type.graphql_schema.GHash;
 import org.nervos.muta.client.type.primitive.U64;
@@ -35,10 +38,14 @@ public class AssetServiceTest {
     private static GAddress another_account_address;
 
     public AssetServiceTest() {
-        assetService = new AssetService(Muta.defaultMuta());
+        Muta muta = Muta.defaultMuta();
+        muta.register(AssetService.eventRegistry);
+        assetService = new AssetService(muta);
 
-        backupAssetService =
-                new AssetService(new Muta(Client.defaultClient(), Account.generate(), null));
+        Muta muta2 = new Muta(Client.defaultClient(), Account.generate(), null);
+        muta2.register(AssetService.eventRegistry);
+
+        backupAssetService = new AssetService(muta2);
 
         issuer = assetService.getMuta().getAccount().getGAddress();
         another_account_address = backupAssetService.getMuta().getAccount().getGAddress();
@@ -47,12 +54,20 @@ public class AssetServiceTest {
     @Test
     @Order(1)
     public void createAsset() throws IOException {
+        List<ParsedEvent<?>> events = new ArrayList<>();
         Asset asset =
                 assetService.createAsset(
-                        new CreateAssetPayload(ASSET_NAME, ASSET_SYMBOL, ASSET_SUPPLY));
+                        new CreateAssetPayload(ASSET_NAME, ASSET_SYMBOL, ASSET_SUPPLY), events);
         Assertions.assertEquals(ASSET_SUPPLY, asset.getSupply());
         Assertions.assertEquals(issuer, asset.getIssuer().toGAdress());
         Assertions.assertEquals(ASSET_SYMBOL, asset.getSymbol());
+        Assertions.assertTrue(
+                events.stream()
+                        .anyMatch(
+                                parsedEvent ->
+                                        parsedEvent.isMatch(
+                                                AssetService.SERVICE_NAME,
+                                                AssetService.EVENT_CREATE_ASSET)));
         asset_id = asset.getId().toGHash();
         log.info("asset id: " + asset_id);
     }
@@ -86,9 +101,11 @@ public class AssetServiceTest {
     @Test
     @Order(4)
     public void transfer() throws IOException {
+        List<ParsedEvent<?>> events = new ArrayList<>();
         assetService.transfer(
                 new TransferPayload(
-                        asset_id.toHash(), EMPTY_ADDRESS.toAddress(), U64.fromLong(100)));
+                        asset_id.toHash(), EMPTY_ADDRESS.toAddress(), U64.fromLong(100)),
+                events);
 
         U64 balance =
                 assetService
@@ -96,16 +113,24 @@ public class AssetServiceTest {
                                 new GetBalancePayload(asset_id.toHash(), EMPTY_ADDRESS.toAddress()))
                         .getBalance();
         Assertions.assertEquals(U64.fromLong(100), balance);
+        Assertions.assertTrue(
+                events.stream()
+                        .anyMatch(
+                                parsedEvent ->
+                                        parsedEvent.isMatch(
+                                                AssetService.SERVICE_NAME,
+                                                AssetService.EVENT_TRANSFER_ASSET)));
     }
 
     @Test
     @Order(5)
     public void approve() throws IOException {
         GAddress another_account_address = backupAssetService.getMuta().getAccount().getGAddress();
-
+        List<ParsedEvent<?>> events = new ArrayList<>();
         assetService.approve(
                 new TransferPayload(
-                        asset_id.toHash(), another_account_address.toAddress(), U64.fromLong(200)));
+                        asset_id.toHash(), another_account_address.toAddress(), U64.fromLong(200)),
+                events);
 
         U64 allowance =
                 assetService
@@ -116,15 +141,32 @@ public class AssetServiceTest {
                                         another_account_address.toAddress()))
                         .getValue();
         Assertions.assertEquals(U64.fromLong(200), allowance);
+        Assertions.assertTrue(
+                events.stream()
+                        .anyMatch(
+                                parsedEvent ->
+                                        parsedEvent.isMatch(
+                                                AssetService.SERVICE_NAME,
+                                                AssetService.EVENT_APPROVE_ASSET)));
 
         log.debug("allowance: " + allowance);
+        List<ParsedEvent<?>> events2 = new ArrayList<>();
+
         backupAssetService.transfer_from(
                 new TransferFromPayload(
                         asset_id.toHash(),
                         issuer.toAddress(),
                         another_account_address.toAddress(),
-                        U64.fromLong(50)));
+                        U64.fromLong(50)),
+                events2);
 
+        Assertions.assertTrue(
+                events2.stream()
+                        .anyMatch(
+                                parsedEvent ->
+                                        parsedEvent.isMatch(
+                                                AssetService.SERVICE_NAME,
+                                                AssetService.EVENT_TRANSFER_FROM)));
         U64 balance =
                 assetService
                         .getBalance(

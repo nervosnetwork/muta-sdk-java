@@ -2,10 +2,13 @@ package org.nervos.muta.service.asset;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.nervos.muta.EventRegisterEntry;
 import org.nervos.muta.Muta;
-import org.nervos.muta.client.type.primitive.U64;
+import org.nervos.muta.client.type.ParsedEvent;
 import org.nervos.muta.service.asset.type.*;
 
 @AllArgsConstructor
@@ -19,15 +22,43 @@ public class AssetService {
     public static final String METHOD_TRANSFER = "transfer";
     public static final String METHOD_APPROVE = "approve";
     public static final String METHOD_TRANSFER_FROM = "transfer_from";
+
+    public static final String EVENT_CREATE_ASSET = "CreateAsset";
+    public static final String EVENT_TRANSFER_ASSET = "TransferAsset";
+    public static final String EVENT_APPROVE_ASSET = "ApproveAsset";
+    public static final String EVENT_TRANSFER_FROM = "TransferFrom";
+
+    public static final List<EventRegisterEntry<?>> eventRegistry;
     private final Muta muta;
 
-    public Asset createAsset(CreateAssetPayload createAssetPayload) throws IOException {
+    static {
+        eventRegistry =
+                Arrays.asList(
+                        new EventRegisterEntry<>(
+                                SERVICE_NAME, EVENT_CREATE_ASSET, new TypeReference<Asset>() {}),
+                        new EventRegisterEntry<>(
+                                SERVICE_NAME,
+                                EVENT_TRANSFER_ASSET,
+                                new TypeReference<TransferEvent>() {}),
+                        new EventRegisterEntry<>(
+                                SERVICE_NAME,
+                                EVENT_APPROVE_ASSET,
+                                new TypeReference<ApproveEvent>() {}),
+                        new EventRegisterEntry<>(
+                                SERVICE_NAME,
+                                EVENT_TRANSFER_FROM,
+                                new TypeReference<TransferFromEvent>() {}));
+    }
+
+    public Asset createAsset(CreateAssetPayload createAssetPayload, List<ParsedEvent<?>> events)
+            throws IOException {
         Asset asset =
                 muta.sendTransactionAndPollResult(
                         SERVICE_NAME,
                         METHOD_CREATE_ASSET,
                         createAssetPayload,
-                        new TypeReference<Asset>() {});
+                        new TypeReference<Asset>() {},
+                        events);
 
         return asset;
     }
@@ -63,29 +94,36 @@ public class AssetService {
         return ret;
     }
 
-    public void transfer(TransferPayload transferPayload) throws IOException {
+    public void transfer(TransferPayload transferPayload, List<ParsedEvent<?>> events)
+            throws IOException {
+
         muta.sendTransactionAndPollResult(
-                SERVICE_NAME, METHOD_TRANSFER, transferPayload, new TypeReference<Void>() {});
+                SERVICE_NAME,
+                METHOD_TRANSFER,
+                transferPayload,
+                new TypeReference<Void>() {},
+                events);
     }
 
-    public void approve(TransferPayload transferPayload) throws IOException {
+    public void approve(TransferPayload transferPayload, List<ParsedEvent<?>> events)
+            throws IOException {
+
         muta.sendTransactionAndPollResult(
-                SERVICE_NAME, METHOD_APPROVE, transferPayload, new TypeReference<Void>() {});
+                SERVICE_NAME,
+                METHOD_APPROVE,
+                transferPayload,
+                new TypeReference<Void>() {},
+                events);
     }
 
-    public void transfer_from(TransferFromPayload transferFromPayload) throws IOException {
+    public void transfer_from(TransferFromPayload transferFromPayload, List<ParsedEvent<?>> events)
+            throws IOException {
+
         muta.sendTransactionAndPollResult(
                 SERVICE_NAME,
                 METHOD_TRANSFER_FROM,
                 transferFromPayload,
-                new TypeReference<Void>() {});
-    }
-
-    public static void main(String[] args) throws IOException {
-
-        Muta muta = Muta.defaultMuta();
-
-        AssetService assetService = new AssetService(muta);
-        assetService.createAsset(new CreateAssetPayload("HAM", "HAM", U64.fromLong(1234)));
+                new TypeReference<Void>() {},
+                events);
     }
 }
