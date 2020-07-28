@@ -94,6 +94,22 @@ public class Account {
                 "0xe05d9e08a18cf5573a92d030342c3b45395cd952e02346ba78e16421ee9dad88");
     }
 
+    public static byte[] convertBech32AddressToBytesAddress(String bech32Address) {
+        return Bech32Util.decodeAddress(bech32Address);
+    }
+
+    public static String convertBech32AddressToHexAddress(String bech32Address) {
+        return Util.start0x(Hex.toHexString(Bech32Util.decodeAddress(bech32Address)));
+    }
+
+    public static String convertBytesAddressToBech32Address(byte[] address) {
+        return Bech32Util.encodeAddress(address);
+    }
+
+    public static String convertHexAddressToBech32Address(String address) {
+        return Bech32Util.encodeAddress(Hex.decode(Util.remove0x(address)));
+    }
+
     public byte[] getPrivateKeyByteArray() {
         return privateKey;
     }

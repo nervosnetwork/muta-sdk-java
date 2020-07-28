@@ -6,9 +6,9 @@ import java.util.Locale;
 
 /** following code is copied from bitcoinJ and https://github.com/sipa/bech32/pull/40/ */
 public class Bech32Util {
+    public static final String HRP;
     /** The Bech32 character set for encoding. */
     private static final String CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
-
     /** The Bech32 character set for decoding. */
     private static final byte[] CHARSET_REV = {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -20,8 +20,6 @@ public class Bech32Util {
         -1, 29, -1, 24, 13, 25, 9, 8, 23, -1, 18, 22, 31, 27, 19, -1,
         1, 0, 3, 16, 11, 28, 12, 14, 6, 4, 2, -1, -1, -1, -1, -1
     };
-
-    public static final String HRP;
 
     static {
         String _hrp = System.getenv("hrp");

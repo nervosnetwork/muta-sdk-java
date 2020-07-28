@@ -363,6 +363,7 @@ public class Muta {
      * @param txHash the transaction hash you want to poll
      * @param tr Type reference to hold type param
      * @param <P> The generic of return data
+     * @param events List to hold events
      * @return The java object or error
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure
      */
@@ -408,6 +409,7 @@ public class Muta {
      * @param txHash The transaction hash
      * @param tr Type reference to hold type param
      * @param <R> The generic of the return data to be unmarshalled
+     * @param events List to hold events
      * @return Return null for receipt is null(maybe not ready), return ParsedServiceResponse if get
      *     receipt
      * @throws IOException Exception, maybe HTTP/network error, or GraphQl execution failure

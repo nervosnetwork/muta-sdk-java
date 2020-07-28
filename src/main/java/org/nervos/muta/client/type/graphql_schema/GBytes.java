@@ -48,6 +48,10 @@ public class GBytes {
         return "GBytes{" + Hex.toHexString(b) + '}';
     }
 
+    public Bytes toBytes() {
+        return Bytes.fromByteArray(this.get());
+    }
+
     public static class GBytesSerializer extends StdSerializer<GBytes> {
         public GBytesSerializer() {
             this(null);
@@ -81,9 +85,5 @@ public class GBytes {
             String hex = root.asText();
             return GBytes.fromHexString(hex);
         }
-    }
-
-    public Bytes toBytes() {
-        return Bytes.fromByteArray(this.get());
     }
 }

@@ -63,6 +63,10 @@ public class Address {
         return "Address{" + Hex.toHexString(b) + '}';
     }
 
+    public GAddress toGAdress() {
+        return GAddress.fromByteArray(this.get());
+    }
+
     public static class AddressSerializer extends StdSerializer<Address> {
         public AddressSerializer() {
             this(null);
@@ -97,9 +101,5 @@ public class Address {
 
             return Address.fromBech32(bech32String);
         }
-    }
-
-    public GAddress toGAdress() {
-        return GAddress.fromByteArray(this.get());
     }
 }

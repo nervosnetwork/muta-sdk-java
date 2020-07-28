@@ -29,7 +29,6 @@ public class AssetService {
     public static final String EVENT_TRANSFER_FROM = "TransferFrom";
 
     public static final List<EventRegisterEntry<?>> eventRegistry;
-    private final Muta muta;
 
     static {
         eventRegistry =
@@ -49,6 +48,8 @@ public class AssetService {
                                 EVENT_TRANSFER_FROM,
                                 new TypeReference<TransferFromEvent>() {}));
     }
+
+    private final Muta muta;
 
     public Asset createAsset(CreateAssetPayload createAssetPayload, List<ParsedEvent<?>> events)
             throws IOException {
