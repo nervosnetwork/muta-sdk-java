@@ -49,6 +49,10 @@ public class Bytes {
         return "Bytes{" + org.bouncycastle.util.encoders.Hex.toHexString(b) + '}';
     }
 
+    public GBytes toGBytes() {
+        return GBytes.fromByteArray(this.get());
+    }
+
     public static class BytesSerializer extends StdSerializer<Bytes> {
         public BytesSerializer() {
             this(null);
@@ -100,9 +104,5 @@ public class Bytes {
                 throw new IOException("Byte need a int array");
             }
         }
-    }
-
-    public GBytes toGBytes() {
-        return GBytes.fromByteArray(this.get());
     }
 }

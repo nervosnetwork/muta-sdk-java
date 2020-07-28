@@ -96,4 +96,22 @@ public class AccountTest {
             Assertions.assertTrue(CryptoUtil.verify(sig, msgHash, acc.getPublicKey()));
         }
     }
+
+    @Test
+    void testBech32FromToHex() {
+        String hexAddress = "0x8ed9a61dc092aaa7d7fd98ef710c9a0ce0e9cf08";
+        String bech32Address = "muta13mv6v8wqj24204lanrhhzry6pnswnncga5c8cl";
+
+        String temp = Account.convertBech32AddressToHexAddress(bech32Address);
+        Assertions.assertEquals(hexAddress, temp);
+
+        byte[] tmp = Account.convertBech32AddressToBytesAddress(bech32Address);
+        Assertions.assertArrayEquals(Hex.decode(Util.remove0x(hexAddress)), tmp);
+
+        temp = Account.convertHexAddressToBech32Address(hexAddress);
+        Assertions.assertEquals(bech32Address, temp);
+
+        temp = Account.convertBytesAddressToBech32Address(Hex.decode(Util.remove0x(hexAddress)));
+        Assertions.assertEquals(bech32Address, temp);
+    }
 }

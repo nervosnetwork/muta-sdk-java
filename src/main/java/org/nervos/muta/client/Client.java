@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.nervos.muta.client.type.MutaRequest;
 import org.nervos.muta.client.type.graphql_schema.*;
-import org.nervos.muta.client.type.graphql_schema.ServiceResponse;
 import org.nervos.muta.client.type.request.*;
 import org.nervos.muta.exception.GraphQlError;
 
@@ -41,8 +40,8 @@ public class Client {
      * Construct only by url, with Muta's default OkHttpClient. If you want to custom your OWN
      * OkHttpClient
      *
-     * @see org.nervos.muta.client.Client#Client(String, OkHttpClient)
      * @param url {@link org.nervos.muta.client.Client#url}
+     * @see org.nervos.muta.client.Client#Client(String, OkHttpClient)
      */
     public Client(String url) {
         this.url = url;

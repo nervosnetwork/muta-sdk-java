@@ -54,6 +54,10 @@ public class GHash {
         return "GHash{" + Hex.toHexString(b) + '}';
     }
 
+    public Hash toHash() {
+        return Hash.fromByteArray(this.get());
+    }
+
     public static class GHashSerializer extends StdSerializer<GHash> {
         public GHashSerializer() {
             this(null);
@@ -88,9 +92,5 @@ public class GHash {
 
             return GHash.fromHexString(hex);
         }
-    }
-
-    public Hash toHash() {
-        return Hash.fromByteArray(this.get());
     }
 }

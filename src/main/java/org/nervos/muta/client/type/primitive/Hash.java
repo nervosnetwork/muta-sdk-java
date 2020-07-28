@@ -54,6 +54,10 @@ public class Hash {
         return "Hash{" + org.bouncycastle.util.encoders.Hex.toHexString(b) + '}';
     }
 
+    public GHash toGHash() {
+        return GHash.fromByteArray(this.get());
+    }
+
     public static class HashSerializer extends StdSerializer<Hash> {
         public HashSerializer() {
             this(null);
@@ -88,9 +92,5 @@ public class Hash {
 
             return Hash.fromHexString(hex);
         }
-    }
-
-    public GHash toGHash() {
-        return GHash.fromByteArray(this.get());
     }
 }

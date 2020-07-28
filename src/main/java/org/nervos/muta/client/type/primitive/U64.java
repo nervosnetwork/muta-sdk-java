@@ -56,6 +56,10 @@ public class U64 {
         return "U64{" + inner.toString() + '}';
     }
 
+    public GUint64 toGUint64() {
+        return GUint64.fromBigInteger(this.get());
+    }
+
     public static class U64Serializer extends StdSerializer<U64> {
 
         public U64Serializer() {
@@ -91,9 +95,5 @@ public class U64 {
             String decimal = root.asText();
             return U64.fromBigInteger(new BigInteger(decimal));
         }
-    }
-
-    public GUint64 toGUint64() {
-        return GUint64.fromBigInteger(this.get());
     }
 }

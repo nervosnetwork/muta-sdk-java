@@ -78,6 +78,10 @@ public class GUint64 {
         return "GUint64{" + inner.toString(16) + '}';
     }
 
+    public U64 toU64() {
+        return U64.fromBigInteger(this.get());
+    }
+
     public static class GUint64Serializer extends StdSerializer<GUint64> {
 
         public GUint64Serializer() {
@@ -112,9 +116,5 @@ public class GUint64 {
             String hex = root.asText();
             return GUint64.fromHexString(hex);
         }
-    }
-
-    public U64 toU64() {
-        return U64.fromBigInteger(this.get());
     }
 }
