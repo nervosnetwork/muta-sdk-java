@@ -2,6 +2,7 @@ package org.nervos.muta.test.service.multi_sig;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -132,7 +133,8 @@ public class MultiSigServiceTest {
 
         Asset asset =
                 account1.getMuta()
-                        .getReceiptSucceedDataRetry(txHash, new TypeReference<Asset>() {}, null)
+                        .getReceiptSucceedDataRetry(
+                                txHash, new TypeReference<Asset>() {}, new ArrayList<>())
                         .getSucceedData();
         Assertions.assertEquals(multi_sig_account, asset.getIssuer().toGAdress());
     }

@@ -1,12 +1,9 @@
 package org.nervos.muta.client.type.graphql_schema;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
-import org.web3j.rlp.RlpEncoder;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpString;
+import java.math.BigInteger;
+import java.util.List;
+import lombok.*;
+import org.web3j.rlp.*;
 
 /**
  * Imply a transaction with needed params
@@ -16,6 +13,7 @@ import org.web3j.rlp.RlpString;
 @Data
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class InputRawTransaction {
 
     /** which chainId this transaction belongs to */
@@ -28,10 +26,10 @@ public class InputRawTransaction {
     @NonNull private GHash nonce;
     /** method name of the service */
     @NonNull private String method;
-    /** the payload of the method, it acts like param of function */
-    @NonNull private String payload;
     /** the service of the query */
     @NonNull private String serviceName;
+    /** the payload of the method, it acts like param of function */
+    @NonNull private String payload;
     /** this transaction is valid before timeout */
     @NonNull private GUint64 timeout;
     /**
@@ -52,5 +50,21 @@ public class InputRawTransaction {
                         RlpString.create(this.payload),
                         RlpString.create(this.timeout.get()),
                         new RlpList(RlpString.create(this.sender.get()))));
+    }
+
+    public static InputRawTransaction decode(byte[] input) {
+        RlpList list = RlpDecoder.decode(input);
+        List<RlpType> items = ((RlpList) list.getValues().get(0)).getValues();
+        return new InputRawTransaction(
+                GHash.fromByteArray(((RlpString) items.get(0)).getBytes()),
+                GUint64.fromBigInteger(new BigInteger(((RlpString) items.get(1)).getBytes())),
+                GUint64.fromBigInteger(new BigInteger(((RlpString) items.get(2)).getBytes())),
+                GHash.fromByteArray(((RlpString) items.get(3)).getBytes()),
+                new String(((RlpString) items.get(4)).getBytes()),
+                new String(((RlpString) items.get(5)).getBytes()),
+                new String(((RlpString) items.get(6)).getBytes()),
+                GUint64.fromBigInteger(new BigInteger(((RlpString) items.get(7)).getBytes())),
+                GAddress.fromByteArray(
+                        ((RlpString) ((RlpList) items.get(8)).getValues().get(0)).getBytes()));
     }
 }

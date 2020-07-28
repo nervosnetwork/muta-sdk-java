@@ -3,6 +3,7 @@ package org.nervos.muta.test.client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import org.junit.jupiter.api.*;
 import org.nervos.muta.Muta;
 import org.nervos.muta.client.Client;
@@ -46,7 +47,7 @@ public class ClientTest {
                         AssetService.METHOD_CREATE_ASSET,
                         new CreateAssetPayload("Squirrel", "SQU", U64.fromLong(1314)));
 
-        muta.getReceiptSucceedDataRetry(gHash, new TypeReference<Asset>() {}, null);
+        muta.getReceiptSucceedDataRetry(gHash, new TypeReference<Asset>() {}, new ArrayList<>());
     }
 
     @Test
