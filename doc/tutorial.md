@@ -2,7 +2,7 @@
 
 ## A Quick Glance
 
-Muta is a high-performance blockchain framework, aiming to build a high-quality blockchain system. `@nervosnetwork/muta-sdk-js`is an SDK(Software Development Kit) implemented by TypeScript, and used to interact with Muta instance. The runnable demo in this tutorial works well in [NodeJS](https://nodejs.org/en/download/) >= 10 as it is written by JavaScript, and some structures that need to be explained will be described by TypeScript interface. It is highly recommended that editing the demo code in [VS Code](https://code.visualstudio.com/) or [WebStorm](https://www.jetbrains.com/webstorm/), since a modern IDE would be better to help you to auto-complete the code. 
+Muta is a high-performance blockchain framework, aiming to build a high-quality blockchain system. `@nervosnetwork/muta-sdk-js`is an SDK(Software Development Kit) implemented by TypeScript, and used to interact with Muta instance. The runnable demo in this tutorial works well in [NodeJS](https://nodejs.org/en/download/) >= 10 as it is written by JavaScript, and some structures that need to be explained will be described by TypeScript interface. It is highly recommended that editing the demo code in [VS Code](https://code.visualstudio.com/) or [WebStorm](https://www.jetbrains.com/webstorm/), since a modern IDE would be better to help you to auto-complete the code.
 
 ## Installation
 
@@ -63,6 +63,7 @@ wallet.getSeed();
 
 // give HD path to derive a 'node', which automatically encapsulated into Accout
 // the first param is coin_type, the seconde param is account_index
+// here we derive the first of ETH addresses
 Account account = wallet.derive(60, 0);
 
 ```
@@ -72,8 +73,10 @@ Account account = wallet.derive(60, 0);
 // generate account by a private key in Hex String format
 Account acc = Account.fromHexString( "0x45c56be699dca666191ad3446897e0f480da234da896270202514a0e1a587c3f");
 
-// get account's address
+// get account's address data in Hex
 acc.getAddressHex();
+// get account's address in Bech32
+acc.getAddress
 // get account's private key
 acc.getPrivateKeyHex();
 // get account's public key

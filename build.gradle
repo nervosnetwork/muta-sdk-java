@@ -82,3 +82,19 @@ publishing {
         }
     }
 }
+
+// only do it before release
+task copyDocTask(dependsOn: javadoc) {
+    doLast {
+        delete{
+            delete fileTree("docs")
+        }
+
+        copy {
+
+            from( fileTree('build/docs/javadoc'))
+
+            into 'docs/'
+        }
+    }
+}
