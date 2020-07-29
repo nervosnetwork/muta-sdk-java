@@ -74,6 +74,14 @@ public class Muta {
         this.client = client;
     }
 
+    /**
+     * Constructor with all params you can customize, and register concerned events
+     *
+     * @param client client {@link org.nervos.muta.Muta#client}
+     * @param account account {@link org.nervos.muta.Muta#account}
+     * @param defaultReqOption options {@link org.nervos.muta.Muta#mutaRequestOption}
+     * @param eventRegisterEntries events you concern {@link org.nervos.muta.EventRegisterEntry}
+     */
     public Muta(
             Client client,
             Account account,
@@ -533,8 +541,8 @@ public class Muta {
                         cyclesPrice,
                         nonce,
                         method,
-                        payload,
                         serviceName,
+                        payload,
                         timeout,
                         sender);
 
@@ -560,8 +568,6 @@ public class Muta {
 
         return inputTransactionEncryption;
     }
-
-    // sign a raw transaction and append your sig to given transaction sig (transactionEncryption)
 
     /**
      * This method use internal account info to sign transaction, and append the signed signature
@@ -650,6 +656,11 @@ public class Muta {
         return CryptoUtil.verify(signature, msgHash, publicKey);
     }
 
+    /**
+     * Register concerned events
+     *
+     * @param eventRegisterEntries List of concerned events
+     */
     public void register(List<EventRegisterEntry<?>> eventRegisterEntries) {
 
         eventRegisterEntries.forEach(

@@ -94,18 +94,41 @@ public class Account {
                 "0xe05d9e08a18cf5573a92d030342c3b45395cd952e02346ba78e16421ee9dad88");
     }
 
+    /**
+     * Get inner address in bech32 format and return in byte array
+     *
+     * @param bech32Address address in bech32 format
+     * @return inner address in byte array
+     */
     public static byte[] convertBech32AddressToBytesAddress(String bech32Address) {
         return Bech32Util.decodeAddress(bech32Address);
     }
-
+    /**
+     * Get inner address in bech32 format and return in hex string
+     *
+     * @param bech32Address address in bech32 format
+     * @return inner address in hex string
+     */
     public static String convertBech32AddressToHexAddress(String bech32Address) {
         return Util.start0x(Hex.toHexString(Bech32Util.decodeAddress(bech32Address)));
     }
 
+    /**
+     * Get bech32 format address from inner address in byte array
+     *
+     * @param address address in bech32 format
+     * @return bech32 address
+     */
     public static String convertBytesAddressToBech32Address(byte[] address) {
         return Bech32Util.encodeAddress(address);
     }
 
+    /**
+     * Get bech32 format address from inner address in hex string
+     *
+     * @param address address in bech32 format
+     * @return bech32 address
+     */
     public static String convertHexAddressToBech32Address(String address) {
         return Bech32Util.encodeAddress(Hex.decode(Util.remove0x(address)));
     }
