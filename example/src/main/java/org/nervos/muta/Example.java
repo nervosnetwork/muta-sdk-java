@@ -2,13 +2,17 @@ package org.nervos.muta;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.nervos.muta.client.Client;
 import org.nervos.muta.client.type.MutaRequestOption;
+import org.nervos.muta.client.type.ParsedEvent;
 import org.nervos.muta.client.type.graphql_schema.*;
 import org.nervos.muta.client.type.primitive.Bytes;
+import org.nervos.muta.service.asset.AssetService;
 import org.nervos.muta.wallet.Account;
 import org.nervos.muta.wallet.Wallet;
 
@@ -31,6 +35,8 @@ public class Example {
                         .readTimeout(30, TimeUnit.SECONDS)
                         .build();
         // now you make a client to talk in GraphQl grammar via HTTP over TCP/IP
+        // this is not recommend to use Client.
+        // Muta contains more functions for easy usage
         Client client = new Client("http://localhost:8000/graphql", okHttpClient);
 
         // get a block
@@ -54,6 +60,9 @@ public class Example {
         // you don't need manually call a query, marshall and unmarshall data, Muta is the tool for
         // you
         Muta muta = new Muta(client, account, MutaRequestOption.defaultMutaRequestOption());
+
+        // you can register concerned event
+        muta.register(AssetService.eventRegistry);
 
         // run a query with given payload and auto parse JSON string back to java object.
         // you can use generic to customize the 3nd and 4th param.
@@ -92,5 +101,16 @@ public class Example {
         Object response =
                 muta.sendTransactionAndPollResult(
                         "service-name", "method", new Object(), new TypeReference<Object>() {});
+
+        // you can create a new List or pass an exist one to get events from the receipt
+        // the events must be registered before
+        List<ParsedEvent<?>> events = new ArrayList<>();
+        Object response2 =
+                muta.sendTransactionAndPollResult(
+                        "service-name",
+                        "method",
+                        new Object(),
+                        new TypeReference<Object>() {},
+                        events);
     }
 }

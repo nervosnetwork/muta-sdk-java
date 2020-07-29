@@ -4,7 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Locale;
 
-/** following code is copied from bitcoinJ and https://github.com/sipa/bech32/pull/40/ */
+/**
+ * following code is copied from bitcoinJ and https://github.com/sipa/bech32/pull/40/
+ *
+ * @author bitcoinj and sipa
+ */
 public class Bech32Util {
     public static final String HRP;
     /** The Bech32 character set for encoding. */
@@ -141,6 +145,7 @@ public class Bech32Util {
         return Arrays.copyOfRange(values, 0, values.length - 6);
     }
 
+    /** following code is copied https://github.com/sipa/bech32/pull/40/ */
     private static byte[] convertBits(
             final byte[] in,
             final int inStart,
@@ -174,11 +179,23 @@ public class Bech32Util {
         return out.toByteArray();
     }
 
+    /**
+     * decode Bech32 address
+     *
+     * @param address bech32 address
+     * @return address contains in bech32 format
+     */
     public static byte[] decodeAddress(String address) {
         byte[] dec = decode(address);
         return convertBits(dec, 0, dec.length, 5, 8, false);
     }
 
+    /**
+     * encode address data with pre-set hrp
+     *
+     * @param code raw address data
+     * @return bech32 address
+     */
     public static String encodeAddress(byte[] code) {
         byte[] convertedCode = convertBits(code, 0, code.length, 8, 5, true);
         return Bech32Util.encode(HRP, convertedCode);
