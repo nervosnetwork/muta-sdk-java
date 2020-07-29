@@ -1,7 +1,6 @@
 package org.nervos.muta.wallet;
 
 import java.math.BigInteger;
-import lombok.Getter;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
@@ -17,7 +16,6 @@ import org.nervos.muta.util.Util;
  *
  * @author Lycrus Hamster
  */
-@Getter
 public class Account {
 
     // 32 bytes
@@ -153,6 +151,10 @@ public class Account {
         return Util.start0x(Hex.toHexString(publicKey));
     }
 
+    public ECPoint getPublicKeyECPoint() {
+        return point;
+    }
+
     public byte[] getAddressByteArray() {
         return address;
     }
@@ -167,6 +169,10 @@ public class Account {
 
     public String getAddressHex() {
         return Util.start0x(Hex.toHexString(address));
+    }
+
+    public String getBech32Address() {
+        return bech32Address;
     }
 
     /**
