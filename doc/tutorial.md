@@ -2,7 +2,11 @@
 
 ## A Quick Glance
 
-Muta is a high-performance blockchain framework, aiming to build a high-quality blockchain system. `@nervosnetwork/muta-sdk-js`is an SDK(Software Development Kit) implemented by TypeScript, and used to interact with Muta instance. The runnable demo in this tutorial works well in [NodeJS](https://nodejs.org/en/download/) >= 10 as it is written by JavaScript, and some structures that need to be explained will be described by TypeScript interface. It is highly recommended that editing the demo code in [VS Code](https://code.visualstudio.com/) or [WebStorm](https://www.jetbrains.com/webstorm/), since a modern IDE would be better to help you to auto-complete the code.
+Muta is a high-performance blockchain framework, aiming to build a high-quality blockchain system.
+ `muta-sdk-java`is an SDK(Software Development Kit) implemented by Java, and used to interact with Muta instance.
+ The runnable demo in this tutorial works well in [Java8].
+ 
+ The maven package is now on jcenter.
 
 ## Installation
 
