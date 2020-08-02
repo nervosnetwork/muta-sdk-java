@@ -12,6 +12,7 @@ import org.nervos.muta.client.type.primitive.U32;
 @NoArgsConstructor
 public class GenerateMultiSigAccountPayload {
     private Address owner;
+    private boolean autonomy;
     private List<AddressWithWeight> addr_with_weight;
     private U32 threshold;
     private String memo;
