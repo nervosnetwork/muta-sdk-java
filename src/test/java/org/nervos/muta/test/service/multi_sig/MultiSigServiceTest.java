@@ -79,6 +79,7 @@ public class MultiSigServiceTest {
                 account1.generate_account(
                         new GenerateMultiSigAccountPayload(
                                 account1addr.toAddress(),
+                                false,
                                 Arrays.asList(
                                         new AddressWithWeight(
                                                 account1addr.toAddress(), U8.fromLong(5)),
