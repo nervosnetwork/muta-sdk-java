@@ -57,9 +57,34 @@ public class Example {
                         GHash.fromHexString(
                                 "0x0000000000000000000000000000000000000000000000000000000000000000"));
 
+        // query
+        ServiceResponse serviceResponse =  client.queryService("service","method","payload,json string", GUint64.fromLong(100),
+                GAddress.fromBech32("muta13mv6v8wqj24204lanrhhzry6pnswnncga5c8cl"), GUint64.fromLong(1), GUint64.fromHexString("0xffffffff"));
+
         // you don't need manually call a query, marshall and unmarshall data, Muta is the tool for
         // you
         Muta muta = new Muta(client, account, MutaRequestOption.defaultMutaRequestOption());
+
+        // get a block
+        Block block1 = muta.getBlock(GUint64.fromLong(0));
+
+        // get a latest block
+        block1 = muta.getBlock(null);
+
+        // get a transaction
+        SignedTransaction signedTransaction1 =
+                muta.getTransaction(
+                        GHash.fromHexString(
+                                "0x0000000000000000000000000000000000000000000000000000000000000000"));
+
+        // get a receipt
+        Receipt receipt1 =
+                muta.getReceipt(
+                        GHash.fromHexString(
+                                "0x0000000000000000000000000000000000000000000000000000000000000000"));
+
+        // query
+        Object serviceResponse1 =  muta.queryService("service", "method", new TypeReference<Object>() {});
 
         // you can register concerned event
         muta.register(AssetService.eventRegistry);

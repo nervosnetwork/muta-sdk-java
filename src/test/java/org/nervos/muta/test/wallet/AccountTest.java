@@ -64,7 +64,7 @@ public class AccountTest {
                         sig,
                         Hex.decode(
                                 "0000000000000000000000000000000000000000000000000000000000000000"),
-                        acc.getPublicKey()));
+                        acc.getPublicKeyByteArray()));
     }
 
     @Test
@@ -93,7 +93,7 @@ public class AccountTest {
             byte[] msgHash = Util.generateRandom32Bytes();
             byte[] sig = acc.sign(msgHash);
             Assertions.assertTrue(CryptoUtil.recovery(sig, msgHash, acc.getAddressByteArray()));
-            Assertions.assertTrue(CryptoUtil.verify(sig, msgHash, acc.getPublicKey()));
+            Assertions.assertTrue(CryptoUtil.verify(sig, msgHash, acc.getPublicKeyByteArray()));
         }
     }
 

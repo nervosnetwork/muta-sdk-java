@@ -95,8 +95,9 @@ byte[] sig = acc.sign(Hex.decode("0000000000000000000000000000000000000000000000
 ```
 // create a Muta instance with a GraphQl url, an account and default option
 // "url" is the remote url is for Client to talk to
-// "0xprivKey" is the private key for Account, you can explore Account for more details
+// "0xPrivKey...." is the private key in hex format for Account, you can explore Account for more details
 // MutaRequestOption is some useful param while whole communication, you can use pre-defined one, or customize it by yourself
+
 Muta muta = new Muta(new Client("url"),Account.fromHexString("0xprivKey"),MutaRequestOption.defaultMutaRequestOption() );
 ```
 
