@@ -49,7 +49,7 @@ public class Account {
 
         this.address = CryptoUtil.getAddressFromPublicKey(this.point);
 
-        this.bech32Address = Bech32Util.encodeAddress(address);
+        this.bech32Address = Bech32Util.encodeAddress(address, null);
     }
 
     /**
@@ -99,7 +99,7 @@ public class Account {
      * @return inner address in byte array
      */
     public static byte[] convertBech32AddressToBytesAddress(String bech32Address) {
-        return Bech32Util.decodeAddress(bech32Address);
+        return Bech32Util.decodeAddress(bech32Address, null);
     }
     /**
      * Get inner address in bech32 format and return in hex string
@@ -108,7 +108,11 @@ public class Account {
      * @return inner address in hex string
      */
     public static String convertBech32AddressToHexAddress(String bech32Address) {
-        return Util.start0x(Hex.toHexString(Bech32Util.decodeAddress(bech32Address)));
+        return Util.start0x(Hex.toHexString(Bech32Util.decodeAddress(bech32Address, null)));
+    }
+
+    public static String convertBech32AddressToHexAddress(String bech32Address, String hrp) {
+        return Util.start0x(Hex.toHexString(Bech32Util.decodeAddress(bech32Address, hrp)));
     }
 
     /**
@@ -118,7 +122,7 @@ public class Account {
      * @return bech32 address
      */
     public static String convertBytesAddressToBech32Address(byte[] address) {
-        return Bech32Util.encodeAddress(address);
+        return Bech32Util.encodeAddress(address, null);
     }
 
     /**
@@ -128,7 +132,11 @@ public class Account {
      * @return bech32 address
      */
     public static String convertHexAddressToBech32Address(String address) {
-        return Bech32Util.encodeAddress(Hex.decode(Util.remove0x(address)));
+        return Bech32Util.encodeAddress(Hex.decode(Util.remove0x(address)), null);
+    }
+
+    public static String convertHexAddressToBech32Address(String address, String hrp) {
+        return Bech32Util.encodeAddress(Hex.decode(Util.remove0x(address)), hrp);
     }
 
     public byte[] getPrivateKeyByteArray() {
@@ -186,5 +194,14 @@ public class Account {
                 CryptoUtil.sign(
                         new BigInteger(Arrays.concatenate(new byte[] {0x00}, privateKey)), msgHash);
         return ret;
+    }
+
+    public static boolean validate_bech32_address(String bech32Address, String hrp) {
+        try {
+            Bech32Util.decodeAddress(bech32Address, hrp);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 }

@@ -91,6 +91,9 @@ public class Bech32Util {
 
     /** Encode a Bech32 string. */
     private static String encode(String hrp, final byte[] values) {
+        if (hrp == null) {
+            hrp = Bech32Util.HRP;
+        }
         if (hrp.length() < 1 || hrp.length() > 83) {
             throw new RuntimeException("hrp length is not between 1 and 83");
         }
@@ -110,7 +113,10 @@ public class Bech32Util {
     }
 
     /** Decode a Bech32 string. */
-    private static byte[] decode(final String str) {
+    private static byte[] decode(final String str, String hrp_prefix) {
+        if (hrp_prefix == null) {
+            hrp_prefix = Bech32Util.HRP;
+        }
         boolean lower = false, upper = false;
         if (str.length() < 8) throw new RuntimeException("Input too short: " + str.length());
         if (str.length() > 90) throw new RuntimeException("Input too long: " + str.length());
@@ -139,7 +145,7 @@ public class Bech32Util {
         }
         String hrp = str.substring(0, pos).toLowerCase(Locale.ROOT);
         if (!verifyChecksum(hrp, values)) throw new RuntimeException();
-        if (!Bech32Util.HRP.equals(hrp)) {
+        if (!hrp.equals(hrp_prefix)) {
             throw new RuntimeException("hrp doesn't match");
         }
         return Arrays.copyOfRange(values, 0, values.length - 6);
@@ -184,9 +190,10 @@ public class Bech32Util {
      *
      * @param address bech32 address
      * @return address contains in bech32 format
+     * @param hrp_prefix hrp prefix, if null, use default
      */
-    public static byte[] decodeAddress(String address) {
-        byte[] dec = decode(address);
+    public static byte[] decodeAddress(String address, String hrp_prefix) {
+        byte[] dec = decode(address, hrp_prefix);
         return convertBits(dec, 0, dec.length, 5, 8, false);
     }
 
@@ -194,10 +201,11 @@ public class Bech32Util {
      * encode address data with pre-set hrp
      *
      * @param code raw address data
+     * @param hrp_prefix hrp prefix, if null, use default
      * @return bech32 address
      */
-    public static String encodeAddress(byte[] code) {
+    public static String encodeAddress(byte[] code, String hrp_prefix) {
         byte[] convertedCode = convertBits(code, 0, code.length, 8, 5, true);
-        return Bech32Util.encode(HRP, convertedCode);
+        return Bech32Util.encode(hrp_prefix, convertedCode);
     }
 }

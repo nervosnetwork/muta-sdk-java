@@ -39,11 +39,9 @@ public class AssetServiceTest {
 
     public AssetServiceTest() {
         Muta muta = Muta.defaultMuta();
-        muta.register(AssetService.eventRegistry);
         assetService = new AssetService(muta);
 
         Muta muta2 = new Muta(Client.defaultClient(), Account.generate(), null);
-        muta2.register(AssetService.eventRegistry);
 
         backupAssetService = new AssetService(muta2);
 

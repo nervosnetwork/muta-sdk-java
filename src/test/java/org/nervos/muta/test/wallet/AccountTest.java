@@ -114,4 +114,18 @@ public class AccountTest {
         temp = Account.convertBytesAddressToBech32Address(Hex.decode(Util.remove0x(hexAddress)));
         Assertions.assertEquals(bech32Address, temp);
     }
+
+    @Test
+    void testBech32Validation() {
+        boolean res =
+                Account.validate_bech32_address(
+                        "muta10e0525sfrf53yh2aljmm3sn9jq5njk7llt9agp", null);
+        Assertions.assertTrue(res);
+        res =
+                Account.validate_bech32_address(
+                        "muta10e0525sfrf53yh2aljmm3sn9jq5njk7llt9agp", "muta");
+        Assertions.assertTrue(res);
+        res = Account.validate_bech32_address("muta10e0525sfrf53yh2aljmm3sn9jq5njk7llt9agp", "xxx");
+        Assertions.assertFalse(res);
+    }
 }

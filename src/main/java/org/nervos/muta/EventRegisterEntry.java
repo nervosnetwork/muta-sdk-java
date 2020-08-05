@@ -14,8 +14,6 @@ import lombok.Data;
 @Builder
 @Data
 public class EventRegisterEntry<T> {
-    /** service name */
-    private String service;
     /** topic name */
     private String name;
     /** corresponding java class */
