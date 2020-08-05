@@ -30,22 +30,22 @@ import org.nervos.muta.wallet.Account;
 @Slf4j
 public class Muta {
     /** Client is on duty of GraphQl communication */
-    private final Client client;
+    protected final Client client;
     /** Account handles all jobs of signing */
-    private final Account account;
+    protected final Account account;
     /** Where options lies */
-    private final MutaRequestOption mutaRequestOption;
+    protected final MutaRequestOption mutaRequestOption;
     /** Jackson's JSON marshall-er */
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    protected final ObjectMapper objectMapper = new ObjectMapper();
     /**
      * A hook before calling {@link
      * org.nervos.muta.client.Client#sendTransaction(InputRawTransaction,
      * InputTransactionEncryption)} You can pass a closure/lambda expression to do some Predication
      * work You can set, unset it whenever
      */
-    @Setter private Predicate<Muta> sendTxBeforeHook;
+    @Setter protected Predicate<Muta> sendTxBeforeHook;
 
-    @Setter private Map<RegistryEntry, TypeReference<?>> eventRegistry = new HashMap<>();
+    @Setter protected Map<RegistryEntry, TypeReference<?>> eventRegistry = new HashMap<>();
 
     /**
      * Constructor with all params you can customize
@@ -427,7 +427,7 @@ public class Muta {
             throws IOException {
         checkClient();
 
-        Receipt receipt = client.getReceipt(txHash);
+        Receipt receipt = this.getReceipt(txHash);
 
         if (receipt == null) {
             return null;
@@ -442,8 +442,7 @@ public class Muta {
                                 event -> {
                                     TypeReference<?> type =
                                             this.eventRegistry.get(
-                                                    new RegistryEntry(
-                                                            event.getService(), event.getName()));
+                                                    new RegistryEntry(event.getName()));
                                     if (type == null) {
                                         return null;
                                     }
@@ -596,7 +595,7 @@ public class Muta {
     }
 
     /** Simple check if client is set, a.k.a. online mode. */
-    private void checkClient() {
+    protected void checkClient() {
         if (this.client == null) {
             throw new RuntimeException("the client of Muta instance hasn't been set");
         }
@@ -666,8 +665,7 @@ public class Muta {
         eventRegisterEntries.forEach(
                 eventRegisterEntry -> {
                     this.eventRegistry.putIfAbsent(
-                            new RegistryEntry(
-                                    eventRegisterEntry.getService(), eventRegisterEntry.getName()),
+                            new RegistryEntry(eventRegisterEntry.getName()),
                             eventRegisterEntry.getDataType());
                 });
     }
@@ -675,8 +673,7 @@ public class Muta {
     @Data
     @AllArgsConstructor
     @EqualsAndHashCode
-    private static class RegistryEntry {
-        private String service;
-        private String name;
+    public static class RegistryEntry {
+        protected String name;
     }
 }

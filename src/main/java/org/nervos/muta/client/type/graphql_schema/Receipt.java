@@ -12,15 +12,15 @@ import org.nervos.muta.client.batch.BatchQueryResponse;
 @NoArgsConstructor
 public class Receipt implements BatchQueryResponse {
     /** which height of block this receipt is minded on */
-    private GUint64 height;
+    protected GUint64 height;
     /** how many cycles are used in the transaction */
-    private GUint64 cyclesUsed;
+    protected GUint64 cyclesUsed;
     /** events emitted during the execution */
-    private List<Event> events;
+    protected List<Event> events;
     /** the state root after this transaction runs */
-    private GHash stateRoot;
+    protected GHash stateRoot;
     /** the transaction hash of the executed transation */
-    private GHash txHash;
+    protected GHash txHash;
     /** response of this transaction */
-    private ReceiptResponse response;
+    protected ReceiptResponse response;
 }

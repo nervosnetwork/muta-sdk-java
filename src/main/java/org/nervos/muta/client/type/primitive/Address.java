@@ -23,6 +23,8 @@ import org.nervos.muta.util.Util;
 @JsonSerialize(using = Address.AddressSerializer.class)
 public class Address {
     public static int LENGTH = 20;
+    public static Address ZERO_ADDRESS =
+            fromHexString("0x0000000000000000000000000000000000000000");
     private final byte[] b;
 
     private final String bech32str;
@@ -32,7 +34,7 @@ public class Address {
             throw new RuntimeException("Address construction fails, input bytes[] != 20");
         }
         this.b = b;
-        this.bech32str = Bech32Util.encodeAddress(b);
+        this.bech32str = Bech32Util.encodeAddress(b, null);
     }
 
     public static boolean is_invalid(byte[] b) {
@@ -50,7 +52,7 @@ public class Address {
     }
 
     public static Address fromBech32(String bech32String) {
-        byte[] address = Bech32Util.decodeAddress(bech32String);
+        byte[] address = Bech32Util.decodeAddress(bech32String, null);
         return fromByteArray(address);
     }
 

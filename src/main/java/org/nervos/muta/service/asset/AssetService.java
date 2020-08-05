@@ -4,14 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.nervos.muta.EventRegisterEntry;
 import org.nervos.muta.Muta;
 import org.nervos.muta.client.type.ParsedEvent;
 import org.nervos.muta.service.asset.type.*;
 
-@AllArgsConstructor
 @Getter
 public class AssetService {
     public static final String SERVICE_NAME = "asset";
@@ -33,23 +31,21 @@ public class AssetService {
     static {
         eventRegistry =
                 Arrays.asList(
+                        new EventRegisterEntry<>(EVENT_CREATE_ASSET, new TypeReference<Asset>() {}),
                         new EventRegisterEntry<>(
-                                SERVICE_NAME, EVENT_CREATE_ASSET, new TypeReference<Asset>() {}),
+                                EVENT_TRANSFER_ASSET, new TypeReference<TransferEvent>() {}),
                         new EventRegisterEntry<>(
-                                SERVICE_NAME,
-                                EVENT_TRANSFER_ASSET,
-                                new TypeReference<TransferEvent>() {}),
+                                EVENT_APPROVE_ASSET, new TypeReference<ApproveEvent>() {}),
                         new EventRegisterEntry<>(
-                                SERVICE_NAME,
-                                EVENT_APPROVE_ASSET,
-                                new TypeReference<ApproveEvent>() {}),
-                        new EventRegisterEntry<>(
-                                SERVICE_NAME,
-                                EVENT_TRANSFER_FROM,
-                                new TypeReference<TransferFromEvent>() {}));
+                                EVENT_TRANSFER_FROM, new TypeReference<TransferFromEvent>() {}));
     }
 
     private final Muta muta;
+
+    public AssetService(Muta muta) {
+        this.muta = muta;
+        muta.register(eventRegistry);
+    }
 
     public Asset createAsset(CreateAssetPayload createAssetPayload, List<ParsedEvent<?>> events)
             throws IOException {
