@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Metadata {
     private Hash chain_id;
+    private String bech32_address_hrp;
     private Hex common_ref;
     private U64 timeout_gap;
     private U64 cycles_limit;
