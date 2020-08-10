@@ -31,6 +31,7 @@ public class GetTransactionRequest implements BatchQuery {
                     + "    txHash\n"
                     + "    pubkey\n"
                     + "    sender\n"
+                    + "    signature\n"
                     + "  }\n"
                     + "}";
 
@@ -52,6 +53,7 @@ public class GetTransactionRequest implements BatchQuery {
                     + "    txHash\n"
                     + "    pubkey\n"
                     + "    sender\n"
+                    + "    signature\n"
                     + "  }\n";
 
     public static String batch_param_prefix = "getTransaction_txHash_";

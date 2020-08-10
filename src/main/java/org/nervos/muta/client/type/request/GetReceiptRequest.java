@@ -51,6 +51,7 @@ public class GetReceiptRequest implements BatchQuery {
                     + "    cyclesUsed\n"
                     + "    events {\n"
                     + "      data\n"
+                    + "      name\n"
                     + "      service\n"
                     + "    }\n"
                     + "    stateRoot\n"
