@@ -12,7 +12,7 @@ import org.nervos.muta.service.authorization.type.SetAdminPayload;
 @AllArgsConstructor
 @Getter
 public class AuthorizationService {
-    public static final String SERVICE_NAME = "metadata";
+    public static final String SERVICE_NAME = "authorization";
     public static final String METHOD_ADD_VERIFIED_ITEM = "add_verified_item";
     public static final String METHOD_REMOVE_VERIFIED_ITEM = "remove_verified_item";
     public static final String METHOD_SET_ADMIN = "set_admin";
