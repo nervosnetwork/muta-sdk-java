@@ -12,6 +12,7 @@ import org.web3j.rlp.*;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @EqualsAndHashCode
 public class InputRawTransaction {

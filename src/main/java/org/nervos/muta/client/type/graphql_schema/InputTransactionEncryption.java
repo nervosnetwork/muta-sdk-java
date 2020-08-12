@@ -2,11 +2,13 @@ package org.nervos.muta.client.type.graphql_schema;
 
 import java.util.List;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.web3j.rlp.*;
 
 /** The signature of certain transaction */
 @Data
+@NoArgsConstructor
 public class InputTransactionEncryption {
     /**
      * Public key<b>s</b> of the signature. Note that Multi-Sig will use this field to contain one
