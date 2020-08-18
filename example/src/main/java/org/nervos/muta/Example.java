@@ -66,7 +66,7 @@ public class Example {
                         GUint64.fromLong(100),
                         GAddress.fromBech32("muta13mv6v8wqj24204lanrhhzry6pnswnncga5c8cl"),
                         GUint64.fromLong(1),
-                        GUint64.fromHexString("0xffffffff"));
+                        GUint64.fromHexadecimalString("0xffffffff"));
 
         // you don't need manually call a query, marshall and unmarshall data, Muta is the tool for
         // you

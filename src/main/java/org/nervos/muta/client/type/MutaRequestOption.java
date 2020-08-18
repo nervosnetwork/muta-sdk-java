@@ -29,9 +29,9 @@ public class MutaRequestOption {
         return new MutaRequestOption(
                 GHash.fromHexString(
                         "0xb6a4d7da21443f5e816e8700eea87610e6d769657d6b8ec73028457bf2ca4036"),
-                GUint64.fromHexString("0x00000000ffffffff"),
-                GUint64.fromHexString("0x0000000000000000"),
-                GUint64.fromHexString("0x0000000000000014"), // 20decimal
+                GUint64.fromHexadecimalString("0x00000000ffffffff"),
+                GUint64.fromHexadecimalString("0x0000000000000000"),
+                GUint64.fromHexadecimalString("0x0000000000000014"), // 20decimal
                 GAddress.fromHexString("0x0000000000000000000000000000000000000000"),
                 2000,
                 10);

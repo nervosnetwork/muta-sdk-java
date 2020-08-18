@@ -42,9 +42,9 @@ public class U64 {
         return new U64(BigInteger.valueOf(input));
     }
 
-    public static U64 fromHexString(String hexString) {
-        Util.isValidHex(hexString);
-        return new U64(new BigInteger(Util.remove0x(hexString), 16));
+    public static U64 fromHexadecimalString(String hexadecimalString) {
+        Util.isValidHex(hexadecimalString);
+        return new U64(new BigInteger(Util.remove0x(hexadecimalString), 16));
     }
 
     public BigInteger get() {
