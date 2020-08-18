@@ -338,7 +338,7 @@ public class Muta {
 
         GHash txHash =
                 this.sendTransaction(null, null, null, null, null, serviceName, method, payload);
-        log.debug("send txhash: " + txHash);
+        log.trace("send txhash: " + txHash);
         ParsedServiceResponse<R> parsedServiceResponse =
                 getReceiptSucceedDataRetry(txHash, tr, events);
         return parsedServiceResponse.isError() ? null : parsedServiceResponse.getSucceedData();
@@ -388,7 +388,7 @@ public class Muta {
                 }
             } catch (GraphQlError e) {
                 lastErr = e;
-                log.debug("getReceiptSucceedDataRetry: " + e.getMessage());
+                log.trace("getReceiptSucceedDataRetry: " + e.getMessage());
             } catch (Exception e) {
                 lastErr = e;
                 log.error("getReceiptSucceedDataRetry: " + e.getMessage());

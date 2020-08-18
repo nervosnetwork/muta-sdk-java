@@ -118,7 +118,7 @@ public class Client {
 
                 JsonNode result = root.get("data").get(operation);
                 String data = result.toString();
-                log.debug("parseGraphQlResponse data >>>" + data);
+                log.trace("parseGraphQlResponse data >>>" + data);
 
                 T ret = objectMapper.treeToValue(result, clazz);
                 return ret;
@@ -268,7 +268,7 @@ public class Client {
                         SendTransactionRequest.query);
 
         String payload = objectMapper.writeValueAsString(mutaRequest);
-        log.debug("sendTransaction: " + payload);
+        log.trace("sendTransaction: " + payload);
         Response response = this.send(payload);
 
         GHash ret =

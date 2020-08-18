@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 import java.math.BigInteger;
 import lombok.EqualsAndHashCode;
-import org.bouncycastle.util.encoders.Hex;
 import org.nervos.muta.client.type.primitive.U64;
 import org.nervos.muta.util.Util;
 
@@ -44,18 +43,9 @@ public class GUint64 {
         return new GUint64(bigInteger);
     }
 
-    public static GUint64 fromHexString(String hexString) {
-        Util.isValidHex(hexString);
-        // add sign byte 0x00 to indicate that's a positive number
-        hexString = "00" + Util.remove0x(hexString);
-        byte[] data = Hex.decode(hexString);
-        BigInteger bigInteger = new BigInteger(data);
-
-        if (is_invalid(bigInteger)) {
-            throw new RuntimeException("GUint64 overflow or underflow while deserializing");
-        }
-
-        return new GUint64(bigInteger);
+    public static GUint64 fromHexadecimalString(String hexadecimalString) {
+        Util.isValidHex(hexadecimalString);
+        return new GUint64(new BigInteger(Util.remove0x(hexadecimalString), 16));
     }
 
     public static GUint64 fromLong(long input) {
@@ -113,8 +103,8 @@ public class GUint64 {
                 throws IOException {
             ObjectCodec oc = jsonParser.getCodec();
             JsonNode root = oc.readTree(jsonParser);
-            String hex = root.asText();
-            return GUint64.fromHexString(hex);
+            String hexa = root.asText();
+            return GUint64.fromHexadecimalString(hexa);
         }
     }
 }
